@@ -1,0 +1,232 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Liam Traders Dashboard</h1>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Users</h3>
+            <p class="stat-number">{{ total_users }}</p>
+            <p class="stat-subtitle">+{{ new_users_today }} today</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Active Tasks</h3>
+            <p class="stat-number">{{ active_tasks }}</p>
+            <p class="stat-subtitle">{{ total_tasks }} total</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Active Surveys</h3>
+            <p class="stat-number">{{ active_surveys }}</p>
+            <p class="stat-subtitle">{{ total_responses }} responses</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Total Courses</h3>
+            <p class="stat-number">{{ total_courses }}</p>
+            <p class="stat-subtitle">{{ total_enrollments }} enrollments</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Total Earnings</h3>
+            <p class="stat-number">KES {{ total_earnings|floatformat:2 }}</p>
+            <p class="stat-subtitle">KES {{ monthly_revenue|floatformat:2 }} this month</p>
+        </div>
+        
+        <div class="stat-card">
+            <h3>Pending Withdrawals</h3>
+            <p class="stat-number">{{ pending_withdrawals }}</p>
+            <p class="stat-subtitle">KES {{ total_pending_balance|floatformat:2 }} pending</p>
+        </div>
+    </div>
+    
+    <!-- Level Distribution -->
+    <div class="chart-section">
+        <h2>User Level Distribution</h2>
+        <div class="level-bars">
+            {% for level in level_distribution %}
+            <div class="level-bar">
+                <span class="level-name">{{ level.level }}</span>
+                <div class="bar-container">
+                    <div class="bar" style="width: {% if total_users > 0 %}{{ level.level|multiply:100|divide:total_users }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="level-count">{{ level.count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="activity-section">
+        <div class="activity-column">
+            <h2>Recent Users</h2>
+            <ul class="activity-list">
+                {% for user in recent_users %}
+                <li>
+                    <strong>{{ user.full_name }}</strong> ({{ user.email }})
+                    <br>
+                    <small>Level {{ user.level }} - {{ user.created_at|date:"M d, Y" }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="activity-column">
+            <h2>Pending Withdrawals</h2>
+            <ul class="activity-list">
+                {% for withdrawal in recent_withdrawals %}
+                <li>
+                    <strong>{{ withdrawal.user.full_name }}</strong>
+                    <br>
+                    KES {{ withdrawal.amount|floatformat:2 }} via {{ withdrawal.withdrawal_method }}
+                    <br>
+                    <small>{{ withdrawal.created_at|date:"M d, Y H:i" }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="activity-column">
+            <h2>Recent Transactions</h2>
+            <ul class="activity-list">
+                {% for transaction in recent_transactions %}
+                <li>
+                    <strong>{{ transaction.user.full_name }}</strong>
+                    <br>
+                    {{ transaction.transaction_type }}: KES {{ transaction.amount|floatformat:2 }}
+                    <br>
+                    <small>{{ transaction.created_at|date:"M d, Y H:i" }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard {
+    padding: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.stat-card h3 {
+    margin: 0 0 10px 0;
+    color: #495057;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #212529;
+    margin: 0;
+}
+
+.stat-subtitle {
+    color: #6c757d;
+    margin: 5px 0 0 0;
+    font-size: 14px;
+}
+
+.chart-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.level-bars {
+    margin-top: 20px;
+}
+
+.level-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.level-name {
+    width: 150px;
+    font-weight: 500;
+}
+
+.bar-container {
+    flex: 1;
+    background: #e9ecef;
+    height: 30px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 15px;
+}
+
+.bar {
+    background: #007bff;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.level-count {
+    width: 50px;
+    text-align: right;
+    font-weight: bold;
+}
+
+.activity-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.activity-column {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.activity-column h2 {
+    margin-top: 0;
+    color: #495057;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.activity-list li:last-child {
+    border-bottom: none;
+}
+
+.activity-list small {
+    color: #6c757d;
+}
+</style>
+{% endblock %}

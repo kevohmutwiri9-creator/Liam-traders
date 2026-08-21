@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Liam Traders</a></h1>
+{% endblock %}
+
+{% block nav-global %}
+{% if user.is_staff %}
+<li><a href="{% url 'admin:dashboard' %}">Dashboard</a></li>
+{% endif %}
+{% endblock %}
