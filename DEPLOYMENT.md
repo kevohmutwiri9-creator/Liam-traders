@@ -6,26 +6,49 @@
 2. Create a Render account at https://render.com
 3. Connect your GitHub account to Render
 
-## Deployment Steps
+## Deployment Steps (Manual Setup)
 
-### 1. Deploy Backend (Django)
+### 1. Create PostgreSQL Database
+
+1. Go to Render Dashboard and click "New +"
+2. Select "PostgreSQL"
+3. Configure:
+   - **Name**: liam-traders-db
+   - **Database**: liam_traders
+   - **User**: liam_traders
+   - **Region**: Choose a region (e.g., Oregon)
+4. Click "Create Database"
+
+### 2. Create Redis Instance
+
+1. Go to Render Dashboard and click "New +"
+2. Select "Redis"
+3. Configure:
+   - **Name**: liam-traders-redis
+   - **Region**: Same as your database
+   - **Maxmemory Policy**: allkeys-lru
+4. Click "Create Redis"
+
+### 3. Deploy Backend (Django)
 
 1. Go to Render Dashboard and click "New +"
 2. Select "Web Service"
 3. Connect your GitHub repository
 4. Configure the service:
    - **Name**: liam-traders-backend
-   - **Environment**: Python
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT`
-   - **Python Version**: 3.12
+   - **Region**: Same as your database
+   - **Branch**: main
+   - **Runtime**: Python 3
+   - **Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+   - **Start Command**: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 4`
 
 5. Add Environment Variables:
-   - `SECRET_KEY`: Generate a secure random key
+   - `PYTHON_VERSION`: `3.12`
+   - `SECRET_KEY`: Generate a secure random key (use: https://djecrety.ir/)
    - `DEBUG`: `False`
-   - `ALLOWED_HOSTS`: Your Render backend URL (e.g., `liam-traders-backend.onrender.com`)
-   - `DATABASE_URL`: Will be automatically set by Render if you create a PostgreSQL database
-   - `REDIS_URL`: Will be automatically set by Render if you create a Redis instance
+   - `ALLOWED_HOSTS`: Your Render backend URL (e.g., `liam-traders-backend.onrender.com,localhost,127.0.0.1`)
+   - `DATABASE_URL`: Will be automatically set by Render when you connect the database
+   - `REDIS_URL`: Will be automatically set by Render when you connect Redis
    - `BASE_URL`: Your backend URL
    - `MPESA_CONSUMER_KEY`: Your M-Pesa consumer key
    - `MPESA_CONSUMER_SECRET`: Your M-Pesa consumer secret
@@ -36,36 +59,19 @@
    - `WITHDRAWAL_FEE_PERCENTAGE`: `0.02`
    - `PLATFORM_FEE_PERCENTAGE`: `0.10`
 
-6. Create a PostgreSQL database:
-   - Go to "New +" → "PostgreSQL"
-   - Name it `liam-traders-db`
-   - Select the same region as your web service
+6. Connect Database:
+   - Scroll down to "Databases"
+   - Select your `liam-traders-db` database
+   - The `DATABASE_URL` environment variable will be automatically added
 
-7. Create a Redis instance (for Celery):
-   - Go to "New +" → "Redis"
-   - Name it `liam-traders-redis`
-   - Select the same region as your web service
+7. Connect Redis:
+   - Scroll down to "Redis"
+   - Select your `liam-traders-redis` instance
+   - The `REDIS_URL` environment variable will be automatically added
 
-6. Click "Deploy Web Service"
+8. Click "Deploy Web Service"
 
-### 2. Deploy Frontend (Next.js)
-
-1. Go to Render Dashboard and click "New +"
-2. Select "Web Service"
-3. Connect your GitHub repository
-4. Configure the service:
-   - **Name**: liam-traders-frontend
-   - **Environment**: Node
-   - **Build Command**: `cd frontend && npm install && npm run build`
-   - **Start Command**: `cd frontend && npm start`
-   - **Node Version**: 18
-
-5. Add Environment Variables:
-   - `NEXT_PUBLIC_API_URL`: Your backend URL (e.g., `https://liam-traders-backend.onrender.com/api`)
-
-6. Click "Deploy Web Service"
-
-### 3. Post-Deployment Setup
+### 4. Post-Deployment Setup
 
 1. **Run Migrations**:
    - Go to your backend service in Render
@@ -83,25 +89,10 @@
    User.objects.create_superuser(email='admin@yourdomain.com', full_name='Admin', password='your_secure_password')
    ```
 
-3. **Configure CORS**:
-   - Update `ALLOWED_HOSTS` in your backend settings to include your frontend URL
-   - Update CORS settings in `config/settings.py` to allow your frontend domain
-
-4. **Test the Application**:
+3. **Test the Application**:
    - Access your backend at `https://liam-traders-backend.onrender.com`
-   - Access your frontend at `https://liam-traders-frontend.onrender.com`
+   - Access admin panel at `https://liam-traders-backend.onrender.com/admin`
    - Test the API endpoints
-   - Test the authentication flow
-
-## Using render.yaml (Alternative Method)
-
-Instead of manually creating services, you can use the `render.yaml` file:
-
-1. Make sure `render.yaml` is in your repository root
-2. Go to Render Dashboard
-3. Click "New +" → "Blueprint"
-4. Connect your GitHub repository
-5. Render will automatically create all services based on the YAML file
 
 ## Troubleshooting
 
