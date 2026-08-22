@@ -39,7 +39,7 @@
    - **Region**: Same as your database
    - **Branch**: main
    - **Runtime**: Python 3
-   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py create_admin && python manage.py collectstatic --noinput`
+   - **Build Command**: `pip install -r requirements.txt && python manage.py ensure_site && python manage.py migrate --noinput && python manage.py create_admin && python manage.py collectstatic --noinput`
    - **Start Command**: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 4`
 
 5. Add Environment Variables:
