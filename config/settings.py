@@ -17,11 +17,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
     'djoser',
-    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -128,7 +128,8 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# Spectacular (OpenAPI)
+# SILENCED_SYSTEM_CHECKS = []
+SITE_ID = 1
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Liam Traders API',
     'DESCRIPTION': 'Earning and Learning Platform API',
