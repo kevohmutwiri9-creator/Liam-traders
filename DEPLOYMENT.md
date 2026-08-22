@@ -39,7 +39,7 @@
    - **Region**: Same as your database
    - **Branch**: main
    - **Runtime**: Python 3
-   - **Build Command**: `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py create_admin && python manage.py collectstatic --noinput`
    - **Start Command**: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 4`
 
 5. Add Environment Variables:
@@ -50,6 +50,9 @@
    - `DATABASE_URL`: Will be automatically set by Render when you connect the database
    - `REDIS_URL`: Will be automatically set by Render when you connect Redis
    - `BASE_URL`: Your backend URL
+   - `ADMIN_EMAIL`: Your admin email (e.g., `kevohmutwiri9@gmail.com`)
+   - `ADMIN_PASSWORD`: Your admin password (e.g., `kevoh2071M@`)
+   - `ADMIN_FULL_NAME`: Your admin full name (e.g., `Admin`)
    - `MPESA_CONSUMER_KEY`: Your M-Pesa consumer key
    - `MPESA_CONSUMER_SECRET`: Your M-Pesa consumer secret
    - `MPESA_PASSKEY`: Your M-Pesa passkey
@@ -73,25 +76,15 @@
 
 ### 4. Post-Deployment Setup
 
-1. **Run Migrations**:
-   - Go to your backend service in Render
-   - Click "Shell" (if available) or use the render CLI
-   - Run: `python manage.py migrate`
+The build command automatically handles:
+- Database migrations
+- Admin user creation (if ADMIN_EMAIL and ADMIN_PASSWORD are set)
+- Static files collection
 
-2. **Create Superuser**:
-   - In the same shell, run:
-   ```python
-   python manage.py shell
-   ```
-   - Then:
-   ```python
-   from apps.users.models import User
-   User.objects.create_superuser(email='admin@yourdomain.com', full_name='Admin', password='your_secure_password')
-   ```
-
-3. **Test the Application**:
+1. **Test the Application**:
    - Access your backend at `https://liam-traders-backend.onrender.com`
    - Access admin panel at `https://liam-traders-backend.onrender.com/admin`
+   - Login with the admin credentials you set in environment variables
    - Test the API endpoints
 
 ## Troubleshooting
