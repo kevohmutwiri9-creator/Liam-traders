@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from apps.admin_dashboard.admin import liam_admin
 
 
 def api_root(request):
@@ -27,7 +28,7 @@ def api_root(request):
 
 urlpatterns = [
     path('', api_root),
-    path('admin/', admin.site.urls),
+    path('admin/', liam_admin.urls),
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),
     path('api/users/', include('apps.users.urls')),
@@ -36,6 +37,7 @@ urlpatterns = [
     path('api/courses/', include('apps.courses.urls')),
     path('api/wallet/', include('apps.wallet.urls')),
     path('api/payments/', include('apps.payments.urls')),
+    path('api/admin-dashboard/', include('apps.admin_dashboard.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='docs'),
 ]
