@@ -10,9 +10,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('courses', '__first__'),
-        ('surveys', '__first__'),
-        ('tasks', '__first__'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -46,9 +43,6 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('approved_at', models.DateTimeField(blank=True, null=True)),
                 ('paid_at', models.DateTimeField(blank=True, null=True)),
-                ('course_enrollment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.enrollment')),
-                ('survey_response', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='surveys.surveyresponse')),
-                ('task_submission', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='tasks.tasksubmission')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='earnings', to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -116,9 +110,6 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('course_enrollment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.enrollment')),
-                ('survey_response', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='surveys.surveyresponse')),
-                ('task_submission', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='tasks.tasksubmission')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to=settings.AUTH_USER_MODEL)),
                 ('withdrawal_request', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='wallet.withdrawalrequest')),
             ],
