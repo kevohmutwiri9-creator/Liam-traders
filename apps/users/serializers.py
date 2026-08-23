@@ -13,9 +13,14 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         model = User
         fields = ['id', 'email', 'full_name', 'phone_number', 'password', 're_password']
     
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        return attrs
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            full_name=validated_data['full_name'],
+            password=validated_data['password'],
+            phone_number=validated_data.get('phone_number', '')
+        )
+        return user
 
 
 class UserSerializer(serializers.ModelSerializer):
