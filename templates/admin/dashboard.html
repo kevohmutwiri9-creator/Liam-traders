@@ -52,7 +52,12 @@
             <div class="level-bar">
                 <span class="level-name">{{ level.level }}</span>
                 <div class="bar-container">
-                    <div class="bar" style="width: {% if total_users > 0 %}{{ level.level|multiply:100|divide:total_users }}{% else %}0{% endif %}%"></div>
+                    {% if total_users > 0 %}
+                        {% widthratio level.count total_users 100 as percentage %}
+                    {% else %}
+                        {% with percentage=0 %}{% endwith %}
+                    {% endif %}
+                    <div class="bar" style="width: {% if total_users > 0 %}{{ percentage }}{% else %}0{% endif %}%"></div>
                 </div>
                 <span class="level-count">{{ level.count }}</span>
             </div>
