@@ -15,6 +15,7 @@ export default function ReferralsPage() {
   const [referralHistory, setReferralHistory] = useState<any>(null);
   const [leaderboard, setLeaderboard] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,11 +62,30 @@ export default function ReferralsPage() {
             <div className="flex items-center gap-2">
               <Input readOnly value={referralLink} className="flex-1" />
               <Button
-                onClick={() => {
-                  navigator.clipboard.writeText(referralLink);
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(referralLink);
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 2000);
+                  } catch (err) {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = referralLink;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                      document.execCommand('copy');
+                      setCopySuccess(true);
+                      setTimeout(() => setCopySuccess(false), 2000);
+                    } catch (e) {
+                      console.error('Failed to copy:', e);
+                      alert('Failed to copy link. Please select and copy manually.');
+                    }
+                    document.body.removeChild(textArea);
+                  }
                 }}
               >
-                Copy Link
+                {copySuccess ? 'Copied!' : 'Copy Link'}
               </Button>
             </div>
             

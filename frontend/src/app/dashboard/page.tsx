@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const updateUser = useAuthStore((state) => state.updateUser);
   const [walletStats, setWalletStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,12 +118,31 @@ export default function DashboardPage() {
                 className="flex-1"
               />
               <Button
-                onClick={() => {
+                onClick={async () => {
                   const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${user?.referral_code || ''}`;
-                  navigator.clipboard.writeText(link);
+                  try {
+                    await navigator.clipboard.writeText(link);
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 2000);
+                  } catch (err) {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = link;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                      document.execCommand('copy');
+                      setCopySuccess(true);
+                      setTimeout(() => setCopySuccess(false), 2000);
+                    } catch (e) {
+                      console.error('Failed to copy:', e);
+                      alert('Failed to copy link. Please select and copy manually.');
+                    }
+                    document.body.removeChild(textArea);
+                  }
                 }}
               >
-                Copy Link
+                {copySuccess ? 'Copied!' : 'Copy Link'}
               </Button>
             </div>
             
