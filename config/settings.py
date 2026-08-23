@@ -7,6 +7,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-very-long-secret-key-change-this-in-production-environment-at-least-32-chars')
 
+# Ensure SECRET_KEY is at least 32 characters for JWT security
+# This is critical for JWT token validation
+if len(SECRET_KEY) < 32:
+    print(f"WARNING: SECRET_KEY is too short ({len(SECRET_KEY)} chars). Padding to 32 chars.")
+    SECRET_KEY = SECRET_KEY.ljust(32, 'x')
+
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,liam-traders.onrender.com', cast=lambda v: [s.strip() for s in v.split(',')])
