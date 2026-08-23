@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { formatCurrency, getLevelName, getLevelColor } from "@/lib/utils";
 import { userAPI, walletAPI } from "@/lib/api";
 
@@ -99,6 +101,43 @@ export default function DashboardPage() {
           </CardHeader>
         </Card>
       </div>
+
+      {/* Referral Section */}
+      <Card className="mb-8 bg-gradient-to-r from-primary-50 to-primary-100">
+        <CardHeader>
+          <CardTitle className="text-xl">Refer & Earn</CardTitle>
+          <CardDescription>Share your referral link and earn KES 50 for each friend who signs up!</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={`${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${user?.referral_code || ''}`}
+                className="flex-1"
+              />
+              <Button
+                onClick={() => {
+                  const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${user?.referral_code || ''}`;
+                  navigator.clipboard.writeText(link);
+                }}
+              >
+                Copy Link
+              </Button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-white p-4 rounded-lg">
+                <p className="text-sm text-gray-600">Total Referrals</p>
+                <p className="text-2xl font-bold">{user?.total_referrals || 0}</p>
+              </div>
+              <div className="bg-white p-4 rounded-lg">
+                <p className="text-sm text-gray-600">Referral Earnings</p>
+                <p className="text-2xl font-bold">{formatCurrency(user?.referral_earnings || 0)}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card>

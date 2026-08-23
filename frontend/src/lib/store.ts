@@ -10,6 +10,9 @@ interface User {
   available_balance: number;
   pending_balance: number;
   total_earnings: number;
+  referral_code?: string;
+  referral_earnings?: number;
+  total_referrals?: number;
 }
 
 interface AuthState {

@@ -82,6 +82,12 @@ class User(AbstractUser):
     available_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     pending_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     
+    # Referral System
+    referral_code = models.CharField(max_length=20, unique=True, blank=True, null=True)
+    referred_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
+    referral_earnings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    total_referrals = models.IntegerField(default=0)
+    
     # Reputation
     reputation_score = models.IntegerField(default=0)
     positive_reviews = models.IntegerField(default=0)
@@ -128,6 +134,26 @@ class User(AbstractUser):
             self.save()
             return True
         return False
+    
+    def generate_referral_code(self):
+        """Generate a unique referral code for the user"""
+        import random
+        import string
+        if not self.referral_code:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+            # Ensure uniqueness
+            while User.objects.filter(referral_code=code).exists():
+                code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+            self.referral_code = code
+            self.save()
+        return self.referral_code
+    
+    def add_referral_earning(self, amount):
+        """Add referral earnings to user's balance"""
+        self.referral_earnings += amount
+        self.available_balance += amount
+        self.total_earnings += amount
+        self.save()
 
 
 class Skill(models.Model):

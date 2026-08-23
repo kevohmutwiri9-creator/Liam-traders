@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,14 +10,24 @@ import { authAPI } from "@/lib/api";
 
 export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     email: "",
     full_name: "",
     password: "",
     re_password: "",
+    referral_code: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Get referral code from URL parameter
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setFormData(prev => ({ ...prev, referral_code: refCode }));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +41,19 @@ export default function Home() {
     setLoading(true);
 
     try {
-      await authAPI.register({
+      const registrationData: any = {
         email: formData.email,
         full_name: formData.full_name,
         password: formData.password,
         re_password: formData.re_password,
-      });
+      };
+      
+      // Only include referral code if provided
+      if (formData.referral_code) {
+        registrationData.referral_code = formData.referral_code;
+      }
+      
+      await authAPI.register(registrationData);
       
       // Redirect to login page
       router.push("/auth/login?registered=true");
@@ -127,6 +144,22 @@ export default function Home() {
                 onChange={(e) => setFormData({ ...formData, re_password: e.target.value })}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="referral_code" className="text-sm font-medium">
+                Referral Code (Optional)
+              </label>
+              <Input
+                id="referral_code"
+                type="text"
+                placeholder="Enter referral code"
+                value={formData.referral_code}
+                onChange={(e) => setFormData({ ...formData, referral_code: e.target.value.toUpperCase() })}
+              />
+              {formData.referral_code && (
+                <p className="text-xs text-green-600">Referral code applied! You'll get a bonus.</p>
+              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>

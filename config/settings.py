@@ -181,6 +181,9 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'https://liam-traders-com.onrender.com/auth/reset-password-confirm/{uid}/{token}/',
 }
 
+# Referral System
+REFERRAL_BONUS = 50.00  # Amount awarded to referrer when someone signs up with their code
+
 # JWT Settings
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
