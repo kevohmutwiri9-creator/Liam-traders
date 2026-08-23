@@ -28,7 +28,8 @@ export default function LoginPage() {
       const response = await authAPI.login(formData.email, formData.password);
       const { access, refresh } = response.data;
       
-      // Store refresh token
+      // Store tokens in localStorage before making authenticated calls
+      localStorage.setItem('token', access);
       localStorage.setItem('refresh_token', refresh);
       
       // Get user profile
