@@ -7,11 +7,15 @@ User = get_user_model()
 
 
 class UserCreateSerializer(BaseUserCreateSerializer):
-    full_name = serializers.CharField(required=True)
+    full_name = serializers.CharField(required=True, max_length=255)
     
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
         fields = ['id', 'email', 'full_name', 'phone_number', 'password', 're_password']
+    
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):
