@@ -29,7 +29,7 @@ export const authAPI = {
   forgotPassword: (data: { email:string }) =>
     api.post('/auth/users/reset_password/', data),
   me: () =>
-    api.get('/users/me/'),
+    api.get('/users/profile/'),
 };
 
 // User API
