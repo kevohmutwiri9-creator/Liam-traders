@@ -132,7 +132,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8">
         <div className="container text-center">
-          <p className="text-gray-400">© 2024 Liam Traders. All rights reserved.</p>
+          <p className="text-gray-400">© 2026 Liam Traders. All rights reserved.</p>
         </div>
       </footer>
     </div>
