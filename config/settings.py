@@ -172,6 +172,7 @@ DJOSER = {
         'UserCreateSerializer': 'apps.users.serializers.UserCreateSerializer',
     },
     'TOKEN_MODEL': 'rest_framework_simplejwt.tokens.Token',
+    'PASSWORD_RESET_CONFIRM_URL': 'https://liam-traders-com.onrender.com/auth/reset-password-confirm/{uid}/{token}/',
 }
 
 # JWT Settings
