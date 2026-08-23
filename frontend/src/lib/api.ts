@@ -13,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Token ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -21,7 +21,7 @@ api.interceptors.request.use((config) => {
 // Auth API
 export const authAPI = {
   login: (email: string, password: string) =>
-    api.post('/auth/token/login/', { email, password }),
+    api.post('/auth/jwt/create/', { email, password }),
   register: (data: any) =>
     api.post('/auth/users/', data),
   logout: () =>

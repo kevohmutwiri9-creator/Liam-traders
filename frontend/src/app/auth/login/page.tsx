@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     try {
       const response = await authAPI.login(formData.email, formData.password);
-      const token = response.data.auth_token;
+      const token = response.data.access;
       
       // Get user profile
       const userResponse = await authAPI.me();
