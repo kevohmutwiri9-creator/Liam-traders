@@ -4,7 +4,8 @@ from .views import (
     EducationListCreateView, EducationDetailView,
     WorkExperienceListCreateView, WorkExperienceDetailView,
     NotificationListView, NotificationDetailView,
-    upgrade_level, level_requirements
+    upgrade_level, level_requirements, referral_leaderboard,
+    referral_history, referral_stats
 )
 
 urlpatterns = [
@@ -19,4 +20,7 @@ urlpatterns = [
     path('notifications/<int:pk>/', NotificationDetailView.as_view(), name='notification-detail'),
     path('upgrade-level/', upgrade_level, name='upgrade-level'),
     path('level-requirements/', level_requirements, name='level-requirements'),
+    path('referral/leaderboard/', referral_leaderboard, name='referral-leaderboard'),
+    path('referral/history/', referral_history, name='referral-history'),
+    path('referral/stats/', referral_stats, name='referral-stats'),
 ]

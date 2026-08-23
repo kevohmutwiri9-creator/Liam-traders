@@ -48,6 +48,12 @@ export const userAPI = {
     api.post('/users/upgrade-level/'),
   getNotifications: () =>
     api.get('/users/notifications/'),
+  getReferralLeaderboard: (limit?: number) =>
+    api.get('/users/referral/leaderboard/', { params: { limit } }),
+  getReferralHistory: () =>
+    api.get('/users/referral/history/'),
+  getReferralStats: () =>
+    api.get('/users/referral/stats/'),
 };
 
 // Tasks API

@@ -106,7 +106,7 @@ export default function DashboardPage() {
       <Card className="mb-8 bg-gradient-to-r from-primary-50 to-primary-100">
         <CardHeader>
           <CardTitle className="text-xl">Refer & Earn</CardTitle>
-          <CardDescription>Share your referral link and earn KES 50 for each friend who signs up!</CardDescription>
+          <CardDescription>Share your referral link and earn up to KES 200 for each friend who signs up!</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -125,6 +125,42 @@ export default function DashboardPage() {
                 Copy Link
               </Button>
             </div>
+            
+            {/* Social Sharing Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${user?.referral_code || ''}`;
+                  const text = 'Join Liam Traders and start earning today!';
+                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`, '_blank');
+                }}
+              >
+                Share on Twitter
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${user?.referral_code || ''}`;
+                  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, '_blank');
+                }}
+              >
+                Share on Facebook
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const link = `${typeof window !== 'undefined' ? window.location.origin : ''}/?ref=${user?.referral_code || ''}`;
+                  window.open(`https://wa.me/?text=${encodeURIComponent('Join Liam Traders and start earning today! ' + link)}`, '_blank');
+                }}
+              >
+                Share on WhatsApp
+              </Button>
+            </div>
+            
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-white p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Total Referrals</p>
@@ -135,6 +171,10 @@ export default function DashboardPage() {
                 <p className="text-2xl font-bold">{formatCurrency(user?.referral_earnings || 0)}</p>
               </div>
             </div>
+            
+            <a href="/dashboard/referrals" className="text-primary-600 hover:underline text-sm">
+              View detailed referral statistics →
+            </a>
           </div>
         </CardContent>
       </Card>

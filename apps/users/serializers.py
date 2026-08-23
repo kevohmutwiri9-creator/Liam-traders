@@ -40,11 +40,19 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         # Generate referral code for new user
         user.generate_referral_code()
         
-        # Award referral bonus to referrer
+        # Award referral bonus to referrer based on tier
         if referrer:
             from django.conf import settings
-            referral_bonus = getattr(settings, 'REFERRAL_BONUS', 50.00)
-            referrer.add_referral_earning(referral_bonus)
+            bonus_tiers = getattr(settings, 'REFERRAL_BONUS_TIERS', {1: 50.00})
+            
+            # Calculate bonus based on referrer's current tier
+            current_bonus = bonus_tiers.get(1, 50.00)
+            for threshold, bonus in sorted(bonus_tiers.items(), reverse=True):
+                if referrer.total_referrals >= threshold:
+                    current_bonus = bonus
+                    break
+            
+            referrer.add_referral_earning(current_bonus)
             referrer.total_referrals += 1
             referrer.save()
         

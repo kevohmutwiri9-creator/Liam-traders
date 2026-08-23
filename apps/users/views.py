@@ -136,3 +136,100 @@ def level_requirements(request):
     }
     
     return Response(requirements)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def referral_leaderboard(request):
+    """Get top referrers leaderboard"""
+    limit = int(request.GET.get('limit', 10))
+    top_referrers = User.objects.filter(
+        total_referrals__gt=0
+    ).order_by('-total_referrals', '-referral_earnings')[:limit]
+    
+    leaderboard = []
+    for rank, user in enumerate(top_referrers, 1):
+        leaderboard.append({
+            'rank': rank,
+            'user_id': user.id,
+            'full_name': user.full_name,
+            'email': user.email[:3] + '***@' + user.email.split('@')[1],  # Partially mask email
+            'total_referrals': user.total_referrals,
+            'referral_earnings': float(user.referral_earnings),
+            'level': user.level,
+            'level_name': dict(User.LEVEL_CHOICES).get(user.level)
+        })
+    
+    return Response({
+        'leaderboard': leaderboard,
+        'total': len(leaderboard)
+    })
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def referral_history(request):
+    """Get referral history for current user"""
+    user = request.user
+    referrals = User.objects.filter(referred_by=user).order_by('-created_at')
+    
+    history = []
+    for referral in referrals:
+        history.append({
+            'user_id': referral.id,
+            'full_name': referral.full_name,
+            'email': referral.email[:3] + '***@' + referral.email.split('@')[1],
+            'created_at': referral.created_at.isoformat(),
+            'level': referral.level,
+            'level_name': dict(User.LEVEL_CHOICES).get(referral.level),
+            'total_earnings': float(referral.total_earnings)
+        })
+    
+    return Response({
+        'referrals': history,
+        'total_referrals': user.total_referrals,
+        'total_earnings': float(user.referral_earnings)
+    })
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def referral_stats(request):
+    """Get comprehensive referral statistics for current user"""
+    user = request.user
+    from django.conf import settings
+    
+    # Calculate bonus tier
+    referral_bonus = getattr(settings, 'REFERRAL_BONUS', 50.00)
+    bonus_tiers = getattr(settings, 'REFERRAL_BONUS_TIERS', {
+        1: 50.00,
+        10: 75.00,
+        25: 100.00,
+        50: 150.00,
+        100: 200.00
+    })
+    
+    current_bonus = referral_bonus
+    for threshold, bonus in sorted(bonus_tiers.items(), reverse=True):
+        if user.total_referrals >= threshold:
+            current_bonus = bonus
+            break
+    
+    next_tier = None
+    for threshold, bonus in sorted(bonus_tiers.items()):
+        if user.total_referrals < threshold:
+            next_tier = {
+                'threshold': threshold,
+                'bonus': bonus,
+                'referrals_needed': threshold - user.total_referrals
+            }
+            break
+    
+    return Response({
+        'total_referrals': user.total_referrals,
+        'referral_earnings': float(user.referral_earnings),
+        'referral_code': user.referral_code,
+        'current_bonus_tier': current_bonus,
+        'next_tier': next_tier,
+        'bonus_tiers': bonus_tiers
+    })

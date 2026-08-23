@@ -183,6 +183,13 @@ DJOSER = {
 
 # Referral System
 REFERRAL_BONUS = 50.00  # Amount awarded to referrer when someone signs up with their code
+REFERRAL_BONUS_TIERS = {
+    1: 50.00,    # Base bonus
+    10: 75.00,   # 10+ referrals
+    25: 100.00,  # 25+ referrals
+    50: 150.00,  # 50+ referrals
+    100: 200.00, # 100+ referrals
+}
 
 # JWT Settings
 SIMPLE_JWT = {
