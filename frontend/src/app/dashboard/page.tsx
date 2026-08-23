@@ -95,7 +95,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardDescription>Quality Score</CardDescription>
-            <CardTitle className="text-2xl">{user?.quality_score.toFixed(1)}%</CardTitle>
+            <CardTitle className="text-2xl">{typeof user?.quality_score === 'number' ? user.quality_score.toFixed(1) : '0.0'}%</CardTitle>
           </CardHeader>
         </Card>
       </div>
