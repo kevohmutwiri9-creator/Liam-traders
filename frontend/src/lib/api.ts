@@ -25,7 +25,7 @@ export const authAPI = {
   register: (data: any) =>
     api.post('/auth/users/', data),
   logout: () =>
-    api.post('/auth/token/logout/'),
+    api.post('/auth/jwt/blacklist/', { refresh: localStorage.getItem('refresh_token') }),
   forgotPassword: (data: { email:string }) =>
     api.post('/auth/users/reset_password/', data),
   me: () =>

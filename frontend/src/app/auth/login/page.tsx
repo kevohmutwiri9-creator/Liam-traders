@@ -26,13 +26,16 @@ export default function LoginPage() {
 
     try {
       const response = await authAPI.login(formData.email, formData.password);
-      const token = response.data.access;
+      const { access, refresh } = response.data;
+      
+      // Store refresh token
+      localStorage.setItem('refresh_token', refresh);
       
       // Get user profile
       const userResponse = await authAPI.me();
       const user = userResponse.data;
       
-      setAuth(user, token);
+      setAuth(user, access);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Login failed. Please try again.");
