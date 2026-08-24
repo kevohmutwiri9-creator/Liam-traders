@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+import random
 
 
 class Task(models.Model):
@@ -209,3 +210,94 @@ class Milestone(models.Model):
     
     def __str__(self):
         return f"{self.task.title} - {self.title}"
+
+
+class TaskTemplate(models.Model):
+    """Template for auto-generating tasks"""
+    TASK_TYPES = [
+        ('microtask', 'Microtask'),
+        ('data_entry', 'Data Entry'),
+        ('transcription', 'Transcription'),
+        ('data_labeling', 'Data Labeling'),
+        ('ai_evaluation', 'AI Evaluation'),
+        ('research', 'Research'),
+        ('testing', 'Testing'),
+        ('content_creation', 'Content Creation'),
+        ('freelance', 'Freelance Project'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    name = models.CharField(max_length=255)
+    task_type = models.CharField(max_length=50, choices=TASK_TYPES)
+    description = models.TextField()
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
+    
+    # Task Configuration
+    base_budget = models.DecimalField(max_digits=10, decimal_places=2)
+    estimated_time_hours = models.DecimalField(max_digits=5, decimal_places=2)
+    deadline_hours = models.IntegerField(default=72)  # Default 3 days
+    
+    # Requirements
+    min_level_required = models.IntegerField(default=1)
+    required_specializations = models.JSONField(default=list, blank=True)
+    
+    # Auto-generation settings
+    auto_generate = models.BooleanField(default=False)
+    generate_frequency_hours = models.IntegerField(default=24)
+    max_active_tasks = models.IntegerField(default=10)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.name
+    
+    def generate_task(self):
+        """Generate a new task from this template"""
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.contrib.auth import get_user_model
+        
+        User = get_user_model()
+        
+        # Check if we've reached max active tasks
+        active_count = Task.objects.filter(
+            status='open',
+            created_at__gte=timezone.now() - timedelta(days=7)
+        ).count()
+        
+        if active_count >= self.max_active_tasks:
+            return None
+        
+        # Get a random client (or use system user)
+        try:
+            client = User.objects.filter(is_staff=True).first()
+        except:
+            client = None
+        
+        # Create task
+        task = Task.objects.create(
+            title=f"{self.name} - {timezone.now().strftime('%B %d, %Y')}",
+            description=self.description,
+            task_type=self.task_type,
+            status='open',
+            priority=self.priority,
+            estimated_time_hours=self.estimated_time_hours,
+            deadline=timezone.now() + timedelta(hours=self.deadline_hours),
+            budget=self.base_budget,
+            min_level_required=self.min_level_required,
+            required_specializations=self.required_specializations,
+            client=client,
+        )
+        
+        return task

@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+import random
 
 
 class Survey(models.Model):
@@ -151,3 +152,124 @@ class SurveyPartner(models.Model):
     
     def __str__(self):
         return self.company
+
+
+class SurveyTemplate(models.Model):
+    """Template for auto-generating surveys"""
+    CATEGORY_CHOICES = [
+        ('market_research', 'Market Research'),
+        ('product_feedback', 'Product Feedback'),
+        ('customer_satisfaction', 'Customer Satisfaction'),
+        ('academic', 'Academic'),
+        ('opinion', 'Opinion'),
+        ('lifestyle', 'Lifestyle'),
+    ]
+    
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    description = models.TextField()
+    
+    # Survey Configuration
+    base_reward_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    estimated_time_minutes = models.IntegerField()
+    max_participants = models.IntegerField()
+    
+    # Auto-generation settings
+    auto_generate = models.BooleanField(default=False)
+    generate_frequency_hours = models.IntegerField(default=24)  # How often to generate
+    max_active_surveys = models.IntegerField(default=5)  # Max active surveys from this template
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.name
+    
+    def generate_survey(self):
+        """Generate a new survey from this template"""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        # Check if we've reached max active surveys
+        active_count = Survey.objects.filter(
+            status='active',
+            created_at__gte=timezone.now() - timedelta(days=7)
+        ).count()
+        
+        if active_count >= self.max_active_surveys:
+            return None
+        
+        # Create survey
+        survey = Survey.objects.create(
+            title=f"{self.name} - {timezone.now().strftime('%B %d, %Y')}",
+            description=self.description,
+            category=self.category,
+            status='active',
+            estimated_time_minutes=self.estimated_time_minutes,
+            max_participants=self.max_participants,
+            reward_amount=self.base_reward_amount,
+            start_date=timezone.now(),
+            end_date=timezone.now() + timedelta(days=30),
+        )
+        
+        # Generate questions from question bank
+        questions = QuestionBank.objects.filter(category=self.category)
+        selected_questions = random.sample(list(questions), min(len(questions), 10))
+        
+        for idx, qb in enumerate(selected_questions):
+            Question.objects.create(
+                survey=survey,
+                question_text=qb.question_text,
+                question_type=qb.question_type,
+                order=idx + 1,
+                options=qb.options,
+                min_value=qb.min_value,
+                max_value=qb.max_value
+            )
+        
+        survey.number_of_questions = len(selected_questions)
+        survey.save()
+        
+        return survey
+
+
+class QuestionBank(models.Model):
+    """Bank of questions for auto-generating surveys"""
+    QUESTION_TYPES = [
+        ('text', 'Text'),
+        ('multiple_choice', 'Multiple Choice'),
+        ('checkbox', 'Checkbox'),
+        ('rating', 'Rating'),
+        ('dropdown', 'Dropdown'),
+        ('date', 'Date'),
+        ('number', 'Number'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('market_research', 'Market Research'),
+        ('product_feedback', 'Product Feedback'),
+        ('customer_satisfaction', 'Customer Satisfaction'),
+        ('academic', 'Academic'),
+        ('opinion', 'Opinion'),
+        ('lifestyle', 'Lifestyle'),
+    ]
+    
+    question_text = models.TextField()
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    
+    options = models.JSONField(default=list, blank=True)
+    min_value = models.IntegerField(null=True, blank=True)
+    max_value = models.IntegerField(null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['category', 'id']
+    
+    def __str__(self):
+        return f"{self.category} - {self.question_text[:50]}"
