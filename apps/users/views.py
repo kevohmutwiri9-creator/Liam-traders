@@ -17,6 +17,9 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self):
+        # Ensure user has a referral code
+        if not self.request.user.referral_code:
+            self.request.user.generate_referral_code()
         return self.request.user
     
     def get_serializer_class(self):
