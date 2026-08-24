@@ -111,6 +111,12 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {/* Referral Code Display */}
+            <div className="bg-white p-4 rounded-lg">
+              <p className="text-sm text-gray-600 mb-1">Your Referral Code</p>
+              <p className="text-2xl font-bold text-primary-600">{user?.referral_code || 'Loading...'}</p>
+            </div>
+            
             <div className="flex items-center gap-2">
               <Input
                 readOnly
