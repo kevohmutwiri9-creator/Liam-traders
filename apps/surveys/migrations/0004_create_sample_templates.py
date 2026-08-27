@@ -60,6 +60,28 @@ def create_sample_templates(apps, schema_editor):
             'generate_frequency_hours': 24,
             'max_active_surveys': 5
         },
+        {
+            'name': 'Trading Experience Survey',
+            'category': 'opinion',
+            'description': 'Share your trading experience and preferences',
+            'base_reward_amount': 60.00,
+            'estimated_time_minutes': 15,
+            'max_participants': 200,
+            'auto_generate': True,
+            'generate_frequency_hours': 12,
+            'max_active_surveys': 8
+        },
+        {
+            'name': 'Financial Literacy Assessment',
+            'category': 'academic',
+            'description': 'Test your financial knowledge and trading concepts',
+            'base_reward_amount': 80.00,
+            'estimated_time_minutes': 20,
+            'max_participants': 100,
+            'auto_generate': True,
+            'generate_frequency_hours': 24,
+            'max_active_surveys': 5
+        },
     ]
     
     for t in templates:
