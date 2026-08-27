@@ -41,7 +41,10 @@ export default function ForgotPasswordPage() {
 
       <Card className="w-full max-w-md relative z-10">
         <CardHeader>
-          <CardTitle className="text-2xl">Forgot Password</CardTitle>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src="/logo.png" alt="Liam Traders" className="w-12 h-12" />
+            <CardTitle className="text-2xl">Forgot Password</CardTitle>
+          </div>
           <CardDescription>
             Enter your email address and we'll send you a link to reset your password
           </CardDescription>

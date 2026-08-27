@@ -67,7 +67,7 @@ export default function SurveysPage() {
                     <span className="text-gray-600">Level Required:</span>
                     <span>{survey.min_level_required}</span>
                   </div>
-                  <Button className="w-full mt-4">Start Survey</Button>
+                  <Button className="w-full mt-4" onClick={() => window.location.href = `/dashboard/surveys/${survey.id}`}>Start Survey</Button>
                 </div>
               </CardContent>
             </Card>

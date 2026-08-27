@@ -81,7 +81,7 @@ export default function TasksPage() {
                     <span className="text-gray-600">Applications:</span>
                     <span>{task.total_applications}</span>
                   </div>
-                  <Button className="w-full mt-4">Apply Now</Button>
+                  <Button className="w-full mt-4" onClick={() => window.location.href = `/dashboard/tasks/${task.id}`}>Apply Now</Button>
                 </div>
               </CardContent>
             </Card>

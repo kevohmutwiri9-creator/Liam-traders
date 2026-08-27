@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+import random
 
 
 class Course(models.Model):
@@ -249,7 +250,6 @@ class Assessment(models.Model):
 class AssessmentAttempt(models.Model):
     STATUS_CHOICES = [
         ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
         ('passed', 'Passed'),
         ('failed', 'Failed'),
     ]
@@ -308,3 +308,119 @@ class InstructorProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.full_name} - Instructor"
+
+
+class CourseTemplate(models.Model):
+    """Template for auto-generating courses"""
+    CATEGORY_CHOICES = [
+        ('programming', 'Programming'),
+        ('web_development', 'Web Development'),
+        ('data_science', 'Data Science'),
+        ('mobile_development', 'Mobile Development'),
+        ('ai_ml', 'AI & Machine Learning'),
+        ('cybersecurity', 'Cybersecurity'),
+        ('devops', 'DevOps'),
+    ]
+    
+    DIFFICULTY_CHOICES = [
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced'),
+    ]
+    
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='beginner')
+    description = models.TextField()
+    
+    # Course Configuration
+    base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_hours = models.IntegerField()
+    number_of_lessons = models.IntegerField(default=10)
+    
+    # Requirements
+    min_level_required = models.IntegerField(default=1)
+    required_skills = models.JSONField(default=list, blank=True)
+    
+    # Auto-generation settings
+    auto_generate = models.BooleanField(default=False)
+    generate_frequency_hours = models.IntegerField(default=168)  # Weekly by default
+    max_active_courses = models.IntegerField(default=5)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.name
+    
+    def generate_course(self):
+        """Generate a new course from this template"""
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.contrib.auth import get_user_model
+        from django.utils.text import slugify
+        
+        User = get_user_model()
+        
+        # Check if we've reached max active courses
+        active_count = Course.objects.filter(
+            status='published',
+            created_at__gte=timezone.now() - timedelta(days=30)
+        ).count()
+        
+        if active_count >= self.max_active_courses:
+            return None
+        
+        # Get a random instructor (or use system user)
+        try:
+            instructor = User.objects.filter(is_staff=True).first()
+        except:
+            instructor = None
+        
+        # Create course
+        course = Course.objects.create(
+            title=f"{self.name} - {timezone.now().strftime('%B %Y')}",
+            description=self.description,
+            category=self.category,
+            difficulty=self.difficulty,
+            status='published',
+            instructor=instructor,
+            is_free=self.base_price == 0,
+            price=self.base_price,
+            min_level_required=self.min_level_required,
+            required_skills=self.required_skills,
+            duration_hours=self.duration_hours,
+            number_of_lessons=self.number_of_lessons,
+            slug=slugify(f"{self.name}-{timezone.now().strftime('%B-%Y')}"),
+            published_at=timezone.now()
+        )
+        
+        # Generate lessons
+        lesson_titles = [
+            "Introduction to the Course",
+            "Getting Started",
+            "Core Concepts",
+            "Practical Examples",
+            "Advanced Techniques",
+            "Best Practices",
+            "Real-world Applications",
+            "Troubleshooting",
+            "Project Work",
+            "Final Assessment"
+        ]
+        
+        for idx, title in enumerate(lesson_titles[:self.number_of_lessons]):
+            Lesson.objects.create(
+                course=course,
+                title=title,
+                description=f"Learn about {title}",
+                lesson_type='video',
+                order=idx + 1,
+                video_duration_seconds=random.randint(600, 3600)  # 10-60 minutes
+            )
+        
+        return course

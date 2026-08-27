@@ -58,7 +58,10 @@ export default function LoginPage() {
 
       <Card className="w-full max-w-md relative z-10">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign In</CardTitle>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src="/logo.png" alt="Liam Traders" className="w-12 h-12" />
+            <CardTitle className="text-2xl">Sign In</CardTitle>
+          </div>
           <CardDescription>
             Enter your credentials to access your account
           </CardDescription>

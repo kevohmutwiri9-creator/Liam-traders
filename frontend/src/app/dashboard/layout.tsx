@@ -29,8 +29,9 @@ export default function DashboardLayout({
       <header className="bg-white border-b">
         <div className="container">
           <div className="flex items-center justify-between h-16">
-            <Link href="/dashboard" className="text-xl font-bold text-primary-600">
-              Liam Traders
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <img src="/logo.png" alt="Liam Traders" className="w-8 h-8" />
+              <span className="text-xl font-bold text-primary-600">Liam Traders</span>
             </Link>
             <nav className="flex items-center gap-6">
               <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
