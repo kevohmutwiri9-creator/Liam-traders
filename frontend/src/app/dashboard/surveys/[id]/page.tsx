@@ -43,7 +43,7 @@ export default function SurveyDetailPage() {
   }, [surveyId, router]);
 
   const handleAnswerChange = (questionId: number, value: any) => {
-    setAnswers(prev => ({
+    setAnswers((prev: any) => ({
       ...prev,
       [questionId]: value
     }));
@@ -105,9 +105,9 @@ export default function SurveyDetailPage() {
                 <Checkbox
                   id={`q${question.id}-opt${idx}`}
                   checked={(answers[question.id] || []).includes(option)}
-                  onCheckedChange={(checked) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const current = answers[question.id] || [];
-                    if (checked) {
+                    if (e.target.checked) {
                       handleAnswerChange(question.id, [...current, option]);
                     } else {
                       handleAnswerChange(question.id, current.filter((v: string) => v !== option));
