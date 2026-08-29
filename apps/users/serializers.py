@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from django.contrib.auth import get_user_model
-from .models import Skill, Education, WorkExperience, Notification
+from .models import Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 
 User = get_user_model()
 
@@ -123,3 +123,30 @@ class LevelUpgradeSerializer(serializers.Serializer):
         user = self.context['request'].user
         user.upgrade_level()
         return user
+
+
+class LevelUpgradePaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LevelUpgradePayment
+        fields = ['id', 'user', 'target_level', 'amount', 'transaction_reference', 'status', 'created_at']
+        read_only_fields = ['id', 'user', 'status', 'created_at']
+    
+    def validate_transaction_reference(self, value):
+        """Ensure transaction reference is unique"""
+        if LevelUpgradePayment.objects.filter(transaction_reference=value).exists():
+            raise serializers.ValidationError("This transaction reference has already been used")
+        return value
+    
+    def validate_target_level(self, value):
+        """Validate target level"""
+        user = self.context['request'].user
+        if value <= user.level:
+            raise serializers.ValidationError(f"You are already at Level {user.level} or higher")
+        if value > 5:
+            raise serializers.ValidationError("Maximum level is 5")
+        return value
+
+
+class PaymentApprovalSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=['approve', 'reject'])
+    notes = serializers.CharField(required=False, allow_blank=True)

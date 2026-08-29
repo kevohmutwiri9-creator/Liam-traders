@@ -2,11 +2,12 @@ from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from .models import Skill, Education, WorkExperience, Notification
+from .models import Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 from .serializers import (
     UserSerializer, UserUpdateSerializer, SkillSerializer,
     EducationSerializer, WorkExperienceSerializer,
-    NotificationSerializer, LevelUpgradeSerializer
+    NotificationSerializer, LevelUpgradeSerializer,
+    LevelUpgradePaymentSerializer, PaymentApprovalSerializer
 )
 
 User = get_user_model()
@@ -236,3 +237,89 @@ def referral_stats(request):
         'next_tier': next_tier,
         'bonus_tiers': bonus_tiers
     })
+
+
+class LevelUpgradePaymentListCreateView(generics.ListCreateAPIView):
+    serializer_class = LevelUpgradePaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        return LevelUpgradePayment.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class PaymentApprovalView(generics.UpdateAPIView):
+    serializer_class = PaymentApprovalSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        # Only admins can approve payments
+        if not self.request.user.is_staff:
+            return LevelUpgradePayment.objects.none()
+        return LevelUpgradePayment.objects.filter(status='pending')
+    
+    def update(self, request, *args, **kwargs):
+        payment = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            action = serializer.validated_data['action']
+            notes = serializer.validated_data.get('notes', '')
+            
+            if action == 'approve':
+                if payment.approve(request.user):
+                    return Response({
+                        'message': 'Payment approved and level upgraded',
+                        'payment_id': payment.id
+                    }, status=status.HTTP_200_OK)
+                return Response(
+                    {'error': 'Cannot approve this payment'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            elif action == 'reject':
+                if payment.reject(request.user, notes):
+                    return Response({
+                        'message': 'Payment rejected',
+                        'payment_id': payment.id
+                    }, status=status.HTTP_200_OK)
+                return Response(
+                    {'error': 'Cannot reject this payment'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def pending_payments(request):
+    """Get all pending payments for admin approval"""
+    if not request.user.is_staff:
+        return Response(
+            {'error': 'Unauthorized'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    payments = LevelUpgradePayment.objects.filter(status='pending').select_related('user')
+    data = []
+    
+    for payment in payments:
+        data.append({
+            'id': payment.id,
+            'user': {
+                'id': payment.user.id,
+                'email': payment.user.email,
+                'full_name': payment.user.full_name,
+                'current_level': payment.user.level
+            },
+            'target_level': payment.target_level,
+            'target_level_name': dict(User.LEVEL_CHOICES).get(payment.target_level),
+            'amount': float(payment.amount),
+            'transaction_reference': payment.transaction_reference,
+            'status': payment.status,
+            'created_at': payment.created_at.isoformat()
+        })
+    
+    return Response({'payments': data, 'total': len(data)})

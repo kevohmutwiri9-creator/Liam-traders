@@ -5,7 +5,8 @@ from .views import (
     WorkExperienceListCreateView, WorkExperienceDetailView,
     NotificationListView, NotificationDetailView,
     upgrade_level, level_requirements, referral_leaderboard,
-    referral_history, referral_stats
+    referral_history, referral_stats, LevelUpgradePaymentListCreateView,
+    PaymentApprovalView, pending_payments
 )
 
 urlpatterns = [
@@ -23,4 +24,7 @@ urlpatterns = [
     path('referral/leaderboard/', referral_leaderboard, name='referral-leaderboard'),
     path('referral/history/', referral_history, name='referral-history'),
     path('referral/stats/', referral_stats, name='referral-stats'),
+    path('payments/', LevelUpgradePaymentListCreateView.as_view(), name='payments'),
+    path('payments/<int:pk>/approve/', PaymentApprovalView.as_view(), name='payment-approve'),
+    path('payments/pending/', pending_payments, name='pending-payments'),
 ]

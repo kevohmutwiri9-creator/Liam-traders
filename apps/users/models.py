@@ -230,3 +230,76 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.title}"
+
+
+class LevelUpgradePayment(models.Model):
+    PAYMENT_STATUS = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='level_payments')
+    target_level = models.IntegerField(choices=User.LEVEL_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_reference = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='pending')
+    admin_notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    processed_at = models.DateTimeField(blank=True, null=True)
+    processed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='processed_payments')
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.email} - Level {self.target_level} - {self.transaction_reference}"
+    
+    def approve(self, admin_user):
+        """Approve payment and upgrade user level"""
+        if self.status != 'pending':
+            return False
+        
+        self.status = 'approved'
+        self.processed_at = models.timezone.now()
+        self.processed_by = admin_user
+        self.save()
+        
+        # Upgrade user level
+        if self.user.level < self.target_level:
+            self.user.level = self.target_level
+            self.user.save()
+        
+        # Create notification
+        Notification.objects.create(
+            user=self.user,
+            type='level',
+            title='Level Upgrade Approved',
+            message=f'Your payment for Level {self.target_level} has been approved. Your level has been upgraded!',
+            action_url='/dashboard'
+        )
+        
+        return True
+    
+    def reject(self, admin_user, notes=''):
+        """Reject payment"""
+        if self.status != 'pending':
+            return False
+        
+        self.status = 'rejected'
+        self.admin_notes = notes
+        self.processed_at = models.timezone.now()
+        self.processed_by = admin_user
+        self.save()
+        
+        # Create notification
+        Notification.objects.create(
+            user=self.user,
+            type='payment',
+            title='Payment Rejected',
+            message=f'Your payment for Level {self.target_level} has been rejected. {notes}',
+            action_url='/dashboard'
+        )
+        
+        return True

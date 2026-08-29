@@ -211,7 +211,7 @@ export default function DashboardPage() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-4 gap-4">
             <a href="/dashboard/tasks" className="p-4 border rounded-lg hover:bg-gray-50 transition">
               <h3 className="font-semibold">Browse Tasks</h3>
               <p className="text-sm text-gray-600">Find work that matches your skills</p>
@@ -223,6 +223,10 @@ export default function DashboardPage() {
             <a href="/dashboard/courses" className="p-4 border rounded-lg hover:bg-gray-50 transition">
               <h3 className="font-semibold">Learn Skills</h3>
               <p className="text-sm text-gray-600">Improve your skills to earn more</p>
+            </a>
+            <a href="/dashboard/upgrade" className="p-4 border rounded-lg hover:bg-gray-50 transition">
+              <h3 className="font-semibold">Upgrade Level</h3>
+              <p className="text-sm text-gray-600">Pay to unlock higher levels</p>
             </a>
           </div>
         </CardContent>

@@ -144,6 +144,15 @@ export const paymentsAPI = {
     api.get('/payments/methods/'),
   addPaymentMethod: (data: any) =>
     api.post('/payments/methods/', data),
+  // Level upgrade payments
+  submitLevelPayment: (data: any) =>
+    api.post('/users/payments/', data),
+  getMyPayments: () =>
+    api.get('/users/payments/'),
+  getPendingPayments: () =>
+    api.get('/users/payments/pending/'),
+  approvePayment: (paymentId: number, data: any) =>
+    api.patch(`/users/payments/${paymentId}/approve/`, data),
 };
 
 export default api;
