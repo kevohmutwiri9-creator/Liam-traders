@@ -13,6 +13,10 @@ interface User {
   referral_code?: string;
   referral_earnings?: number;
   total_referrals?: number;
+  phone_number?: string;
+  bio?: string;
+  location?: string;
+  date_of_birth?: string;
 }
 
 interface AuthState {
