@@ -223,6 +223,7 @@ class Notification(models.Model):
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     action_url = models.URLField(blank=True, null=True)
+    notification_type = models.CharField(max_length=50, default='general')
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:

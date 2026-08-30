@@ -270,6 +270,14 @@ class PaymentApprovalView(generics.UpdateAPIView):
             
             if action == 'approve':
                 if payment.approve(request.user):
+                    # Send notification to user
+                    Notification.objects.create(
+                        user=payment.user,
+                        title='Level Upgrade Approved',
+                        message=f'Your level upgrade to {dict(User.LEVEL_CHOICES).get(payment.target_level)} has been approved!',
+                        notification_type='level_upgrade',
+                        is_read=False
+                    )
                     return Response({
                         'message': 'Payment approved and level upgraded',
                         'payment_id': payment.id
@@ -280,6 +288,14 @@ class PaymentApprovalView(generics.UpdateAPIView):
                 )
             elif action == 'reject':
                 if payment.reject(request.user, notes):
+                    # Send notification to user
+                    Notification.objects.create(
+                        user=payment.user,
+                        title='Level Upgrade Rejected',
+                        message=f'Your level upgrade request has been rejected. Reason: {notes or "Not specified"}',
+                        notification_type='level_upgrade',
+                        is_read=False
+                    )
                     return Response({
                         'message': 'Payment rejected',
                         'payment_id': payment.id
@@ -368,3 +384,11 @@ def auto_generate_content(request):
         'message': 'Auto-generation complete',
         'results': results
     })
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def mark_all_notifications_read(request):
+    """Mark all notifications as read for the current user"""
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    return Response({'message': 'All notifications marked as read'})

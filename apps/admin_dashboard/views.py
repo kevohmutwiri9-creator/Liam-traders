@@ -3,6 +3,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Count, Avg, Q
 from django.utils import timezone
 from datetime import timedelta
+from django.http import JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
 from apps.users.models import User
 from apps.tasks.models import Task, TaskSubmission
 from apps.surveys.models import Survey, SurveyResponse
@@ -122,3 +126,106 @@ def dashboard(request):
     }
     
     return render(request, 'admin/dashboard.html', context)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_users(request):
+    """Get all users for admin management"""
+    users = User.objects.all().order_by('-created_at')
+    data = []
+    
+    for user in users:
+        data.append({
+            'id': user.id,
+            'email': user.email,
+            'full_name': user.full_name,
+            'level': user.level,
+            'is_staff': user.is_staff,
+            'is_active': user.is_active,
+            'total_tasks_completed': user.total_tasks_completed,
+            'quality_score': float(user.quality_score) if user.quality_score else 0.0,
+            'total_referrals': user.total_referrals,
+            'created_at': user.created_at.isoformat(),
+        })
+    
+    return Response(data)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def update_user(request, user_id):
+    """Update user information (admin only)"""
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    
+    if 'level' in request.data:
+        user.level = request.data['level']
+        # Send notification to user
+        from apps.users.models import Notification
+        Notification.objects.create(
+            user=user,
+            title='Level Updated',
+            message=f'Your level has been updated to Level {user.level}',
+            notification_type='level_upgrade',
+            is_read=False
+        )
+    
+    if 'is_active' in request.data:
+        user.is_active = request.data['is_active']
+    
+    user.save()
+    
+    return Response({'message': 'User updated successfully'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def ban_user(request, user_id):
+    """Ban a user (admin only)"""
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    
+    user.is_active = False
+    user.save()
+    
+    # Send notification to user
+    from apps.users.models import Notification
+    Notification.objects.create(
+        user=user,
+        title='Account Banned',
+        message='Your account has been banned. Please contact support for more information.',
+        notification_type='account',
+        is_read=False
+    )
+    
+    return Response({'message': 'User banned successfully'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def unban_user(request, user_id):
+    """Unban a user (admin only)"""
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    
+    user.is_active = True
+    user.save()
+    
+    # Send notification to user
+    from apps.users.models import Notification
+    Notification.objects.create(
+        user=user,
+        title='Account Reactivated',
+        message='Your account has been reactivated. You can now access your account.',
+        notification_type='account',
+        is_read=False
+    )
+    
+    return Response({'message': 'User unbanned successfully'})

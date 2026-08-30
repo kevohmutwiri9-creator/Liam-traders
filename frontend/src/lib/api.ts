@@ -38,6 +38,8 @@ export const userAPI = {
     api.get('/users/profile/'),
   updateProfile: (data: any) =>
     api.patch('/users/profile/', data),
+  changePassword: (data: any) =>
+    api.post('/auth/users/set_password/', data),
   getSkills: () =>
     api.get('/users/skills/'),
   createSkill: (data: any) =>
@@ -48,6 +50,10 @@ export const userAPI = {
     api.post('/users/upgrade-level/'),
   getNotifications: () =>
     api.get('/users/notifications/'),
+  markNotificationAsRead: (id: number) =>
+    api.patch(`/users/notifications/${id}/`, { is_read: true }),
+  markAllNotificationsAsRead: () =>
+    api.post('/users/notifications/mark-all-read/'),
   getReferralLeaderboard: (limit?: number) =>
     api.get('/users/referral/leaderboard/', { params: { limit } }),
   getReferralHistory: () =>
