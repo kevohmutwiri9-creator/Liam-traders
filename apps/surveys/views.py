@@ -29,9 +29,9 @@ class SurveyListCreateView(generics.ListCreateAPIView):
         if category:
             queryset = queryset.filter(category=category)
         
-        # Filter by user's level
-        user_level = self.request.user.level
-        queryset = queryset.filter(min_level_required__lte=user_level)
+        # Filter by user's level (optional - commented out for now)
+        # user_level = self.request.user.level
+        # queryset = queryset.filter(min_level_required__lte=user_level)
         
         return queryset
     

@@ -30,16 +30,16 @@ class TaskListCreateView(generics.ListCreateAPIView):
         if task_type:
             queryset = queryset.filter(task_type=task_type)
         
-        # Filter by user's level
-        user_level = self.request.user.level
-        queryset = queryset.filter(min_level_required__lte=user_level)
+        # Filter by user's level (optional - commented out for now)
+        # user_level = self.request.user.level
+        # queryset = queryset.filter(min_level_required__lte=user_level)
         
-        # Filter by specialization
-        if self.request.user.specialization:
-            queryset = queryset.filter(
-                Q(required_specializations__contains=[]) |
-                Q(required_specializations__contains=[self.request.user.specialization])
-            )
+        # Filter by specialization (optional - commented out for now)
+        # if self.request.user.specialization:
+        #     queryset = queryset.filter(
+        #         Q(required_specializations__contains=[]) |
+        #         Q(required_specializations__contains=[self.request.user.specialization])
+        #     )
         
         return queryset
     

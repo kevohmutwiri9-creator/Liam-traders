@@ -38,9 +38,9 @@ class CourseListCreateView(generics.ListCreateAPIView):
         if is_free:
             queryset = queryset.filter(is_free=is_free == 'true')
         
-        # Filter by user's level
-        user_level = self.request.user.level
-        queryset = queryset.filter(min_level_required__lte=user_level)
+        # Filter by user's level (optional - commented out for now)
+        # user_level = self.request.user.level
+        # queryset = queryset.filter(min_level_required__lte=user_level)
         
         return queryset
     
