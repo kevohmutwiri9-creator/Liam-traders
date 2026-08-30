@@ -1,3 +1,4 @@
+import logging
 from rest_framework import generics, status, permissions, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -9,6 +10,8 @@ from .serializers import (
     QuestionSerializer
 )
 
+logger = logging.getLogger(__name__)
+
 
 class SurveyListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -17,21 +20,31 @@ class SurveyListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['reward_amount', 'start_date', 'end_date']
     
     def get_queryset(self):
+        logger.info(f"=== SURVEYS API CALLED ===")
+        logger.info(f"User: {self.request.user.email}, Level: {self.request.user.level}")
+        logger.info(f"Query params: {self.request.query_params}")
+        
         queryset = Survey.objects.all()
+        logger.info(f"Total surveys in DB: {queryset.count()}")
         
         # Filter by status
         status_filter = self.request.query_params.get('status', 'active')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+            logger.info(f"After status filter ({status_filter}): {queryset.count()}")
         
         # Filter by category
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category=category)
+            logger.info(f"After category filter ({category}): {queryset.count()}")
         
         # Filter by user's level (optional - commented out for now)
         # user_level = self.request.user.level
         # queryset = queryset.filter(min_level_required__lte=user_level)
+        
+        logger.info(f"Final queryset count: {queryset.count()}")
+        logger.info(f"=== END SURVEYS API ===")
         
         return queryset
     

@@ -1,3 +1,4 @@
+import logging
 from rest_framework import generics, status, permissions, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -10,6 +11,8 @@ from .serializers import (
     TaskReviewSerializer, MilestoneSerializer
 )
 
+logger = logging.getLogger(__name__)
+
 
 class TaskListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -18,17 +21,24 @@ class TaskListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['budget', 'deadline', 'created_at']
     
     def get_queryset(self):
+        logger.info(f"=== TASKS API CALLED ===")
+        logger.info(f"User: {self.request.user.email}, Level: {self.request.user.level}")
+        logger.info(f"Query params: {self.request.query_params}")
+        
         queryset = Task.objects.all()
+        logger.info(f"Total tasks in DB: {queryset.count()}")
         
         # Filter by status
         status_filter = self.request.query_params.get('status', 'open')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+            logger.info(f"After status filter ({status_filter}): {queryset.count()}")
         
         # Filter by task type
         task_type = self.request.query_params.get('task_type')
         if task_type:
             queryset = queryset.filter(task_type=task_type)
+            logger.info(f"After task_type filter ({task_type}): {queryset.count()}")
         
         # Filter by user's level (optional - commented out for now)
         # user_level = self.request.user.level
@@ -40,6 +50,9 @@ class TaskListCreateView(generics.ListCreateAPIView):
         #         Q(required_specializations__contains=[]) |
         #         Q(required_specializations__contains=[self.request.user.specialization])
         #     )
+        
+        logger.info(f"Final queryset count: {queryset.count()}")
+        logger.info(f"=== END TASKS API ===")
         
         return queryset
     

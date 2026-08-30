@@ -1,3 +1,4 @@
+import logging
 from rest_framework import generics, status, permissions, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -13,6 +14,8 @@ from .serializers import (
     AssessmentSerializer, AssessmentAttemptSerializer, InstructorProfileSerializer
 )
 
+logger = logging.getLogger(__name__)
+
 
 class CourseListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -21,26 +24,40 @@ class CourseListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['average_rating', 'number_of_enrollments', 'price', 'created_at']
     
     def get_queryset(self):
-        queryset = Course.objects.filter(status='published')
+        logger.info(f"=== COURSES API CALLED ===")
+        logger.info(f"User: {self.request.user.email}, Level: {self.request.user.level}")
+        logger.info(f"Query params: {self.request.query_params}")
+        
+        queryset = Course.objects.all()
+        logger.info(f"Total courses in DB: {queryset.count()}")
+        
+        queryset = queryset.filter(status='published')
+        logger.info(f"After status filter (published): {queryset.count()}")
         
         # Filter by category
         category = self.request.query_params.get('category')
         if category:
             queryset = queryset.filter(category=category)
+            logger.info(f"After category filter ({category}): {queryset.count()}")
         
         # Filter by difficulty
         difficulty = self.request.query_params.get('difficulty')
         if difficulty:
             queryset = queryset.filter(difficulty=difficulty)
+            logger.info(f"After difficulty filter ({difficulty}): {queryset.count()}")
         
         # Filter by price (free or paid)
         is_free = self.request.query_params.get('is_free')
         if is_free:
             queryset = queryset.filter(is_free=is_free == 'true')
+            logger.info(f"After is_free filter ({is_free}): {queryset.count()}")
         
         # Filter by user's level (optional - commented out for now)
         # user_level = self.request.user.level
         # queryset = queryset.filter(min_level_required__lte=user_level)
+        
+        logger.info(f"Final queryset count: {queryset.count()}")
+        logger.info(f"=== END COURSES API ===")
         
         return queryset
     
