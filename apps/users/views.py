@@ -323,3 +323,48 @@ def pending_payments(request):
         })
     
     return Response({'payments': data, 'total': len(data)})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAdminUser])
+def auto_generate_content(request):
+    """Generate surveys, tasks, and courses from templates (admin only)"""
+    from apps.surveys.models import SurveyTemplate
+    from apps.tasks.models import TaskTemplate
+    from apps.courses.models import CourseTemplate
+    
+    results = {
+        'surveys': 0,
+        'tasks': 0,
+        'courses': 0,
+        'errors': []
+    }
+    
+    # Generate surveys
+    for template in SurveyTemplate.objects.filter(auto_generate=True):
+        try:
+            if template.generate_survey():
+                results['surveys'] += 1
+        except Exception as e:
+            results['errors'].append(f'Survey {template.name}: {str(e)}')
+    
+    # Generate tasks
+    for template in TaskTemplate.objects.filter(auto_generate=True):
+        try:
+            if template.generate_task():
+                results['tasks'] += 1
+        except Exception as e:
+            results['errors'].append(f'Task {template.name}: {str(e)}')
+    
+    # Generate courses
+    for template in CourseTemplate.objects.filter(auto_generate=True):
+        try:
+            if template.generate_course():
+                results['courses'] += 1
+        except Exception as e:
+            results['errors'].append(f'Course {template.name}: {str(e)}')
+    
+    return Response({
+        'message': 'Auto-generation complete',
+        'results': results
+    })

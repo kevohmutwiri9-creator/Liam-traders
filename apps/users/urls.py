@@ -6,7 +6,7 @@ from .views import (
     NotificationListView, NotificationDetailView,
     upgrade_level, level_requirements, referral_leaderboard,
     referral_history, referral_stats, LevelUpgradePaymentListCreateView,
-    PaymentApprovalView, pending_payments
+    PaymentApprovalView, pending_payments, auto_generate_content
 )
 
 urlpatterns = [
@@ -27,4 +27,5 @@ urlpatterns = [
     path('payments/', LevelUpgradePaymentListCreateView.as_view(), name='payments'),
     path('payments/<int:pk>/approve/', PaymentApprovalView.as_view(), name='payment-approve'),
     path('payments/pending/', pending_payments, name='pending-payments'),
+    path('auto-generate/', auto_generate_content, name='auto-generate'),
 ]
