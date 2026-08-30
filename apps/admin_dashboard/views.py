@@ -204,6 +204,23 @@ def update_user(request, user_id):
     if 'is_active' in request.data:
         user.is_active = request.data['is_active']
     
+    if 'total_earnings' in request.data:
+        from apps.wallet.models import Wallet
+        wallet, created = Wallet.objects.get_or_create(user=user)
+        wallet.total_earnings = request.data['total_earnings']
+        wallet.available_balance = request.data['total_earnings']
+        wallet.save()
+        
+        # Send notification to user
+        from apps.users.models import Notification
+        Notification.objects.create(
+            user=user,
+            title='Earnings Updated',
+            message=f'Your earnings have been updated to ${request.data["total_earnings"]}',
+            notification_type='account',
+            is_read=False
+        )
+    
     user.save()
     
     return Response({'message': 'User updated successfully'})
@@ -264,3 +281,51 @@ def unban_user(request, user_id):
 def get_logs(request):
     """Get system logs (admin only)"""
     return Response(_log_storage.logs)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_stats(request):
+    """Get admin dashboard statistics (admin only)"""
+    total_users = User.objects.count()
+    new_users_today = User.objects.filter(created_at__date=timezone.now().date()).count()
+    
+    # Level distribution
+    level_distribution = []
+    for level_num in range(1, 6):
+        count = User.objects.filter(level=level_num).count()
+        level_name = dict(User.LEVEL_CHOICES).get(level_num, f'Level {level_num}')
+        level_distribution.append({'level': level_name, 'count': count})
+    
+    # Recent users
+    recent_users = User.objects.order_by('-created_at')[:5]
+    recent_users_data = []
+    for user in recent_users:
+        recent_users_data.append({
+            'id': user.id,
+            'email': user.email,
+            'full_name': user.full_name,
+            'created_at': user.created_at.isoformat(),
+        })
+    
+    # Task stats
+    from apps.tasks.models import Task
+    active_tasks = Task.objects.filter(status='open').count()
+    
+    # Withdrawal stats
+    from apps.wallet.models import WithdrawalRequest
+    pending_withdrawals = WithdrawalRequest.objects.filter(status='pending').count()
+    
+    # Total earnings
+    from apps.wallet.models import Wallet
+    total_earnings = Wallet.objects.aggregate(total=Sum('total_earnings'))['total'] or 0
+    
+    return Response({
+        'total_users': total_users,
+        'new_users_today': new_users_today,
+        'level_distribution': level_distribution,
+        'recent_users': recent_users_data,
+        'active_tasks': active_tasks,
+        'pending_withdrawals': pending_withdrawals,
+        'total_earnings': total_earnings,
+    })

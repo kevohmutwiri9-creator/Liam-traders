@@ -57,6 +57,15 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleEarningsUpdate = async (userId: number, earnings: number) => {
+    try {
+      await api.patch(`/admin-dashboard/users/${userId}/`, { total_earnings: earnings });
+      setUsers(users.map(user => user.id === userId ? { ...user, total_earnings: earnings } : user));
+    } catch (error) {
+      console.error("Failed to update earnings:", error);
+    }
+  };
+
   const filteredUsers = users.filter(user =>
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -110,11 +119,15 @@ export default function AdminUsersPage() {
                     </div>
                     <div>
                       <span className="text-gray-500">Quality:</span>
-                      <span className="ml-2 font-medium">{typeof user.quality_score === 'number' ? user.quality_score.toFixed(1) : '0.0'}%</span>
+                      <span className="ml-2 font-medium">{user.quality_score?.toFixed(2) || '0.00'}</span>
                     </div>
                     <div>
                       <span className="text-gray-500">Referrals:</span>
                       <span className="ml-2 font-medium">{user.total_referrals}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Earnings:</span>
+                      <span className="ml-2 font-medium">${user.total_earnings?.toFixed(2) || '0.00'}</span>
                     </div>
                   </div>
                 </div>
@@ -128,6 +141,14 @@ export default function AdminUsersPage() {
                       <option key={level} value={level}>Level {level}</option>
                     ))}
                   </select>
+                  <input
+                    type="number"
+                    placeholder="Earnings"
+                    value={user.total_earnings || ''}
+                    onChange={(e) => handleEarningsUpdate(user.id, parseFloat(e.target.value) || 0)}
+                    className="px-3 py-2 border rounded-md"
+                    step="0.01"
+                  />
                   {user.is_active ? (
                     <Button variant="destructive" size="sm" onClick={() => handleBanUser(user.id)}>
                       Ban User

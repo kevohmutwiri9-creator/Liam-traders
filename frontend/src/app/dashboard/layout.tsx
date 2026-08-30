@@ -84,6 +84,9 @@ export default function DashboardLayout({
               </Link>
               {user?.is_staff && (
                 <>
+                  <Link href="/dashboard/admin" className="text-gray-600 hover:text-gray-900">
+                    Dashboard
+                  </Link>
                   <Link href="/dashboard/admin/users" className="text-gray-600 hover:text-gray-900">
                     Users
                   </Link>

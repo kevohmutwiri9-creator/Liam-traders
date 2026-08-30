@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import dashboard, get_users, update_user, ban_user, unban_user, get_logs
+from .views import dashboard, get_users, update_user, ban_user, unban_user, get_logs, get_stats
 
 urlpatterns = [
     path('dashboard/', dashboard, name='dashboard'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('users/<int:user_id>/ban/', ban_user, name='ban-user'),
     path('users/<int:user_id>/unban/', unban_user, name='unban-user'),
     path('logs/', get_logs, name='get-logs'),
+    path('stats/', get_stats, name='get-stats'),
 ]
