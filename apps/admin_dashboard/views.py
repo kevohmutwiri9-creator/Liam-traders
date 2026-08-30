@@ -13,6 +13,34 @@ from apps.surveys.models import Survey, SurveyResponse
 from apps.courses.models import Course, Enrollment
 from apps.wallet.models import Wallet, Transaction, WithdrawalRequest
 from apps.payments.models import MpesaPayment
+import logging
+from threading import local
+
+# Thread-local storage for logs
+_log_storage = local()
+_log_storage.logs = []
+
+class LogHandler(logging.Handler):
+    def emit(self, record):
+        log_entry = {
+            'timestamp': timezone.now().isoformat(),
+            'level': record.levelname,
+            'message': self.format(record),
+            'source': record.name,
+        }
+        _log_storage.logs.append(log_entry)
+        # Keep only last 1000 logs
+        if len(_log_storage.logs) > 1000:
+            _log_storage.logs = _log_storage.logs[-1000:]
+
+# Configure logging
+log_handler = LogHandler()
+log_handler.setLevel(logging.INFO)
+logging.getLogger('apps.surveys.views').addHandler(log_handler)
+logging.getLogger('apps.tasks.views').addHandler(log_handler)
+logging.getLogger('apps.courses.views').addHandler(log_handler)
+logging.getLogger('apps.users.views').addHandler(log_handler)
+logging.getLogger('apps.admin_dashboard.views').addHandler(log_handler)
 
 
 @staff_member_required
@@ -229,3 +257,10 @@ def unban_user(request, user_id):
     )
     
     return Response({'message': 'User unbanned successfully'})
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_logs(request):
+    """Get system logs (admin only)"""
+    return Response(_log_storage.logs)
