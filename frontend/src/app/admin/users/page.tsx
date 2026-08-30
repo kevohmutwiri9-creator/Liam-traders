@@ -15,8 +15,8 @@ export default function AdminUsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await api.get('/admin/users/');
-        setUsers(res.data.results || res.data);
+        const res = await api.get('/admin-dashboard/users/');
+        setUsers(res.data);
       } catch (error) {
         console.error("Failed to fetch users:", error);
       } finally {
@@ -29,19 +29,17 @@ export default function AdminUsersPage() {
 
   const handleLevelChange = async (userId: number, newLevel: number) => {
     try {
-      await api.patch(`/admin/users/${userId}/`, { level: newLevel });
-      setUsers(users.map(u => u.id === userId ? { ...u, level: newLevel } : u));
+      await api.patch(`/admin-dashboard/users/${userId}/`, { level: newLevel });
+      setUsers(users.map(user => user.id === userId ? { ...user, level: newLevel } : user));
     } catch (error) {
       console.error("Failed to update user level:", error);
     }
   };
 
   const handleBanUser = async (userId: number) => {
-    if (!confirm('Are you sure you want to ban this user?')) return;
-    
     try {
-      await api.post(`/admin/users/${userId}/ban/`);
-      setUsers(users.map(u => u.id === userId ? { ...u, is_active: false } : u));
+      await api.post(`/admin-dashboard/users/${userId}/ban/`);
+      setUsers(users.map(user => user.id === userId ? { ...user, is_active: false } : user));
     } catch (error) {
       console.error("Failed to ban user:", error);
     }
@@ -49,8 +47,8 @@ export default function AdminUsersPage() {
 
   const handleUnbanUser = async (userId: number) => {
     try {
-      await api.post(`/admin/users/${userId}/unban/`);
-      setUsers(users.map(u => u.id === userId ? { ...u, is_active: true } : u));
+      await api.post(`/admin-dashboard/users/${userId}/unban/`);
+      setUsers(users.map(user => user.id === userId ? { ...user, is_active: true } : user));
     } catch (error) {
       console.error("Failed to unban user:", error);
     }
@@ -89,7 +87,7 @@ export default function AdminUsersPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold">{user.full_name || 'No name'}</h3>
+                    <h3 className="font-semibold text-gray-900">{user.full_name || 'No name'}</h3>
                     <Badge variant={user.is_staff ? 'default' : 'secondary'}>
                       {user.is_staff ? 'Admin' : 'User'}
                     </Badge>

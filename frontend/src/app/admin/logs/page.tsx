@@ -15,7 +15,7 @@ export default function AdminLogsPage() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const res = await api.get('/admin/logs/');
+        const res = await api.get('/admin-dashboard/logs/');
         setLogs(res.data);
       } catch (error: any) {
         console.error("Failed to fetch logs:", error);
@@ -37,11 +37,11 @@ export default function AdminLogsPage() {
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'INFO': return 'bg-blue-600';
-      case 'WARNING': return 'bg-yellow-600';
-      case 'ERROR': return 'bg-red-600';
-      case 'DEBUG': return 'bg-gray-600';
-      default: return 'bg-green-600';
+      case 'INFO': return 'bg-blue-600 text-white';
+      case 'WARNING': return 'bg-yellow-600 text-white';
+      case 'ERROR': return 'bg-red-600 text-white';
+      case 'DEBUG': return 'bg-gray-600 text-white';
+      default: return 'bg-green-600 text-white';
     }
   };
 

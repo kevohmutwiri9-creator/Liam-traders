@@ -83,9 +83,14 @@ export default function DashboardLayout({
                 Settings
               </Link>
               {user?.is_staff && (
-                <Link href="/admin/users" className="text-gray-600 hover:text-gray-900">
-                  Admin
-                </Link>
+                <>
+                  <Link href="/admin/users" className="text-gray-600 hover:text-gray-900">
+                    Users
+                  </Link>
+                  <Link href="/admin/logs" className="text-gray-600 hover:text-gray-900">
+                    Logs
+                  </Link>
+                </>
               )}
               <button
                 onClick={() => {
