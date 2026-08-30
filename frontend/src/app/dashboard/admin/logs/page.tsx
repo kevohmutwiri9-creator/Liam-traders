@@ -25,8 +25,8 @@ export default function AdminLogsPage() {
     };
 
     fetchLogs();
-    // Poll for new logs every 10 seconds
-    const interval = setInterval(fetchLogs, 10000);
+    // Poll for new logs every 5 seconds for real-time updates
+    const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
   }, []);
 

@@ -25,6 +25,9 @@ export default function AdminUsersPage() {
     };
 
     fetchUsers();
+    // Poll for user updates every 10 seconds
+    const interval = setInterval(fetchUsers, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLevelChange = async (userId: number, newLevel: number) => {
