@@ -15,9 +15,11 @@ export default function SurveysPage() {
     const fetchSurveys = async () => {
       try {
         const res = await surveysAPI.getSurveys({ status: 'active' });
+        console.log('Surveys API response:', res.data);
         setSurveys(res.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch surveys:", error);
+        console.error("Error response:", error.response?.data);
       } finally {
         setLoading(false);
       }

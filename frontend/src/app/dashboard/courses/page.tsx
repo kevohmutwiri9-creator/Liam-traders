@@ -15,9 +15,11 @@ export default function CoursesPage() {
     const fetchCourses = async () => {
       try {
         const res = await coursesAPI.getCourses({ status: 'published' });
+        console.log('Courses API response:', res.data);
         setCourses(res.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch courses:", error);
+        console.error("Error response:", error.response?.data);
       } finally {
         setLoading(false);
       }

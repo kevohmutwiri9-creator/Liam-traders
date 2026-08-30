@@ -15,9 +15,11 @@ export default function TasksPage() {
     const fetchTasks = async () => {
       try {
         const res = await tasksAPI.getTasks({ status: 'open' });
+        console.log('Tasks API response:', res.data);
         setTasks(res.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch tasks:", error);
+        console.error("Error response:", error.response?.data);
       } finally {
         setLoading(false);
       }
