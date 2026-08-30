@@ -14,7 +14,7 @@ def create_sample_templates(apps, schema_editor):
             'max_participants': 100,
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_surveys': 5
+            'max_active_surveys': 50
         },
         {
             'name': 'Product Feedback Survey',
@@ -25,7 +25,7 @@ def create_sample_templates(apps, schema_editor):
             'max_participants': 50,
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_surveys': 3
+            'max_active_surveys': 50
         },
         {
             'name': 'Customer Satisfaction Check',
@@ -36,7 +36,7 @@ def create_sample_templates(apps, schema_editor):
             'max_participants': 200,
             'auto_generate': True,
             'generate_frequency_hours': 12,
-            'max_active_surveys': 10
+            'max_active_surveys': 50
         },
         {
             'name': 'Opinion Poll',
@@ -47,7 +47,7 @@ def create_sample_templates(apps, schema_editor):
             'max_participants': 500,
             'auto_generate': True,
             'generate_frequency_hours': 6,
-            'max_active_surveys': 15
+            'max_active_surveys': 100
         },
         {
             'name': 'Lifestyle Survey',
@@ -58,7 +58,7 @@ def create_sample_templates(apps, schema_editor):
             'max_participants': 150,
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_surveys': 5
+            'max_active_surveys': 50
         },
         {
             'name': 'Trading Experience Survey',
@@ -69,7 +69,7 @@ def create_sample_templates(apps, schema_editor):
             'max_participants': 200,
             'auto_generate': True,
             'generate_frequency_hours': 12,
-            'max_active_surveys': 8
+            'max_active_surveys': 50
         },
         {
             'name': 'Financial Literacy Assessment',
@@ -80,7 +80,7 @@ def create_sample_templates(apps, schema_editor):
             'max_participants': 100,
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_surveys': 5
+            'max_active_surveys': 50
         },
     ]
     

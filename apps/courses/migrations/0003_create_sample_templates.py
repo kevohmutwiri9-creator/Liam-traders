@@ -17,7 +17,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': [],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 3
+            'max_active_courses': 20
         },
         {
             'name': 'JavaScript for Beginners',
@@ -31,7 +31,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': [],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 3
+            'max_active_courses': 20
         },
         {
             'name': 'Java Programming Mastery',
@@ -45,7 +45,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': [],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 2
+            'max_active_courses': 15
         },
         {
             'name': 'C++ Programming Advanced',
@@ -59,7 +59,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 336,
-            'max_active_courses': 2
+            'max_active_courses': 15
         },
         {
             'name': 'Web Development with React',
@@ -73,7 +73,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 2
+            'max_active_courses': 20
         },
         {
             'name': 'Full Stack Development with Node.js',
@@ -87,7 +87,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 2
+            'max_active_courses': 20
         },
         {
             'name': 'Data Science with Python',
@@ -101,7 +101,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 2
+            'max_active_courses': 20
         },
         {
             'name': 'Mobile App Development with React Native',
@@ -115,7 +115,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 2
+            'max_active_courses': 20
         },
         {
             'name': 'Machine Learning Fundamentals',
@@ -129,7 +129,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 336,
-            'max_active_courses': 1
+            'max_active_courses': 15
         },
         {
             'name': 'Trading Fundamentals for Beginners',
@@ -143,7 +143,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': [],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 3
+            'max_active_courses': 20
         },
         {
             'name': 'Technical Analysis Mastery',
@@ -157,7 +157,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': [],
             'auto_generate': True,
             'generate_frequency_hours': 168,
-            'max_active_courses': 2
+            'max_active_courses': 20
         },
         {
             'name': 'Algorithmic Trading with Python',
@@ -171,7 +171,7 @@ def create_sample_templates(apps, schema_editor):
             'required_skills': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 336,
-            'max_active_courses': 1
+            'max_active_courses': 15
         },
     ]
     

@@ -382,6 +382,8 @@ class CourseTemplate(models.Model):
             instructor = None
         
         # Create course
+        import uuid
+        unique_suffix = str(uuid.uuid4())[:8]
         course = Course.objects.create(
             title=f"{self.name} - {timezone.now().strftime('%B %Y')}",
             description=self.description,
@@ -395,7 +397,7 @@ class CourseTemplate(models.Model):
             required_skills=self.required_skills,
             duration_hours=self.duration_hours,
             number_of_lessons=self.number_of_lessons,
-            slug=slugify(f"{self.name}-{timezone.now().strftime('%B-%Y')}"),
+            slug=slugify(f"{self.name}-{timezone.now().strftime('%B-%Y')}-{unique_suffix}"),
             published_at=timezone.now()
         )
         

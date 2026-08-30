@@ -17,7 +17,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': [],
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_tasks': 10
+            'max_active_tasks': 30
         },
         {
             'name': 'Transcription Job',
@@ -31,7 +31,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': ['writing'],
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_tasks': 5
+            'max_active_tasks': 30
         },
         {
             'name': 'Data Labeling Project',
@@ -45,7 +45,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 48,
-            'max_active_tasks': 3
+            'max_active_tasks': 30
         },
         {
             'name': 'AI Evaluation Task',
@@ -59,7 +59,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 48,
-            'max_active_tasks': 2
+            'max_active_tasks': 30
         },
         {
             'name': 'Research Task',
@@ -73,7 +73,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': [],
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_tasks': 5
+            'max_active_tasks': 30
         },
         {
             'name': 'Content Writing',
@@ -87,7 +87,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': ['writing'],
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_tasks': 5
+            'max_active_tasks': 30
         },
         {
             'name': 'Website Testing',
@@ -101,7 +101,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 48,
-            'max_active_tasks': 3
+            'max_active_tasks': 30
         },
         {
             'name': 'Microtask Batch',
@@ -115,7 +115,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': [],
             'auto_generate': True,
             'generate_frequency_hours': 12,
-            'max_active_tasks': 20
+            'max_active_tasks': 50
         },
         {
             'name': 'Market Analysis Task',
@@ -129,7 +129,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': [],
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_tasks': 3
+            'max_active_tasks': 30
         },
         {
             'name': 'Trading Signal Verification',
@@ -143,7 +143,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': ['programming'],
             'auto_generate': True,
             'generate_frequency_hours': 48,
-            'max_active_tasks': 2
+            'max_active_tasks': 30
         },
         {
             'name': 'Financial Content Creation',
@@ -157,7 +157,7 @@ def create_sample_templates(apps, schema_editor):
             'required_specializations': ['writing'],
             'auto_generate': True,
             'generate_frequency_hours': 24,
-            'max_active_tasks': 4
+            'max_active_tasks': 30
         },
     ]
     
