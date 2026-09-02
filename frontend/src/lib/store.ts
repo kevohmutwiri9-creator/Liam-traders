@@ -26,7 +26,9 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   setAuth: (user: User, token: string) => void;
+  initializeAuth: () => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
   refreshUser: () => Promise<void>;
@@ -36,16 +38,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
   isAuthenticated: false,
+  isInitialized: false,
   setAuth: (user, token) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
-    set({ user, token, isAuthenticated: true });
+    set({ user, token, isAuthenticated: true, isInitialized: true });
+  },
+  initializeAuth: () => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+
+    if (token && userStr) {
+      try {
+        set({ user: JSON.parse(userStr), token, isAuthenticated: true, isInitialized: true });
+        return;
+      } catch (error) {
+        console.error('Failed to restore saved user:', error);
+      }
+    }
+
+    set({ isInitialized: true });
   },
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('refresh_token');
-    set({ user: null, token: null, isAuthenticated: false });
+    set({ user: null, token: null, isAuthenticated: false, isInitialized: true });
   },
   updateUser: (updatedUser) => {
     set((state) => ({
@@ -70,11 +88,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
 // Initialize from localStorage
 if (typeof window !== 'undefined') {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  if (token && userStr) {
-    useAuthStore.getState().setAuth(JSON.parse(userStr), token);
-  }
+  useAuthStore.getState().initializeAuth();
   
   // Poll for user updates every 30 seconds
   setInterval(() => {

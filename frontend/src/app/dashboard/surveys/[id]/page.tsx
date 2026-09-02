@@ -21,6 +21,7 @@ export default function SurveyDetailPage() {
   const [answers, setAnswers] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,7 +34,7 @@ export default function SurveyDetailPage() {
         setQuestions(questionsRes.data);
       } catch (error) {
         console.error("Failed to fetch survey:", error);
-        router.push("/dashboard/surveys");
+        setLoadError("This survey could not be loaded. Please return to the survey list and try again.");
       } finally {
         setLoading(false);
       }
@@ -166,6 +167,21 @@ export default function SurveyDetailPage() {
 
   if (loading) {
     return <div className="container py-8">Loading survey...</div>;
+  }
+
+  if (loadError || !survey) {
+    return (
+      <div className="container py-8">
+        <Card>
+          <CardContent className="space-y-4 py-8">
+            <p className="text-red-600">{loadError || "Survey not found."}</p>
+            <Button variant="outline" onClick={() => router.push("/dashboard/surveys")}>
+              Back to Surveys
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

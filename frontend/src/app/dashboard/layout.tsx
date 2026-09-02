@@ -13,15 +13,16 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isInitialized = useAuthStore((state) => state.isInitialized);
   const user = useAuthStore((state) => state.user);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isInitialized && !isAuthenticated) {
       router.push("/auth/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isInitialized, router]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -43,7 +44,7 @@ export default function DashboardLayout({
     }
   }, [isAuthenticated]);
 
-  if (!isAuthenticated) {
+  if (!isInitialized || !isAuthenticated) {
     return null;
   }
 

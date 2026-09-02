@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { formatCurrency } from "@/lib/utils";
 import { tasksAPI } from "@/lib/api";
 
 export default function TasksPage() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +90,7 @@ export default function TasksPage() {
                     <span className="text-gray-600">Applications:</span>
                     <span>{task.total_applications}</span>
                   </div>
-                  <Button className="w-full mt-4" onClick={() => window.location.href = `/dashboard/tasks/${task.id}`}>Apply Now</Button>
+                  <Button className="w-full mt-4" onClick={() => router.push(`/dashboard/tasks/${task.id}`)}>Apply Now</Button>
                 </div>
               </CardContent>
             </Card>

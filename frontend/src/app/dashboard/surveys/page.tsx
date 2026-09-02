@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { formatCurrency } from "@/lib/utils";
 import { surveysAPI } from "@/lib/api";
 
 export default function SurveysPage() {
+  const router = useRouter();
   const [surveys, setSurveys] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +76,7 @@ export default function SurveysPage() {
                     <span className="text-gray-600">Level Required:</span>
                     <span>{survey.min_level_required}</span>
                   </div>
-                  <Button className="w-full mt-4" onClick={() => window.location.href = `/dashboard/surveys/${survey.id}`}>Start Survey</Button>
+                  <Button className="w-full mt-4" onClick={() => router.push(`/dashboard/surveys/${survey.id}`)}>Start Survey</Button>
                 </div>
               </CardContent>
             </Card>
