@@ -30,6 +30,7 @@ export default function DashboardLayout({
         setUnreadCount(notifications.filter((n: any) => !n.is_read).length);
       } catch (error) {
         console.error("Failed to fetch notifications:", error);
+        // Don't logout on notification fetch failure
       }
     };
 

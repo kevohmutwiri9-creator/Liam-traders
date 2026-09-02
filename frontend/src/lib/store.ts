@@ -63,6 +63,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user: updatedUser });
     } catch (error) {
       console.error('Failed to refresh user:', error);
+      // Don't logout on refresh failure - could be temporary network issue
     }
   },
 }));
