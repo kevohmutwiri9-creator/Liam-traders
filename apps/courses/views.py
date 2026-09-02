@@ -31,8 +31,11 @@ class CourseListCreateView(generics.ListCreateAPIView):
         queryset = Course.objects.all()
         logger.info(f"Total courses in DB: {queryset.count()}")
         
-        queryset = queryset.filter(status='published')
-        logger.info(f"After status filter (published): {queryset.count()}")
+        # Filter by status (only if explicitly provided)
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+            logger.info(f"After status filter ({status_filter}): {queryset.count()}")
         
         # Filter by category
         category = self.request.query_params.get('category')

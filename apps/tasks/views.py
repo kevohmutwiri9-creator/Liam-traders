@@ -28,8 +28,8 @@ class TaskListCreateView(generics.ListCreateAPIView):
         queryset = Task.objects.all()
         logger.info(f"Total tasks in DB: {queryset.count()}")
         
-        # Filter by status
-        status_filter = self.request.query_params.get('status', 'open')
+        # Filter by status (only if explicitly provided)
+        status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
             logger.info(f"After status filter ({status_filter}): {queryset.count()}")
