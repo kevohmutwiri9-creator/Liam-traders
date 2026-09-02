@@ -55,7 +55,7 @@ export default function TasksPage() {
       </div>
 
       {tasks?.results && tasks.results.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tasks.results.map((task: any) => (
             <Card key={task.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>

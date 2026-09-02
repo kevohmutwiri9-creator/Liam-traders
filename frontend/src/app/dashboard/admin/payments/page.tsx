@@ -117,7 +117,7 @@ export default function AdminPaymentsPage() {
             {pendingPayments.map((payment) => (
               <Card key={payment.id}>
                 <CardHeader>
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <CardTitle>
                         {payment.user.full_name}
@@ -128,7 +128,7 @@ export default function AdminPaymentsPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 md:grid-cols-4">
                     <div>
                       <p className="text-sm text-gray-600">Current Level</p>
                       <p className="font-semibold">Level {payment.user.current_level}</p>

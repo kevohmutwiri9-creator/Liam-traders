@@ -131,7 +131,7 @@ export default function ReferralsPage() {
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardDescription>Total Referrals</CardDescription>

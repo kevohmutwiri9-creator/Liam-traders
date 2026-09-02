@@ -44,7 +44,7 @@ export default function WalletPage() {
       </div>
 
       {/* Balance Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardDescription>Available Balance</CardDescription>

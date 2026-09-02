@@ -54,7 +54,7 @@ export default function CoursesPage() {
       </div>
 
       {courses?.results && courses.results.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses.results.map((course: any) => (
             <Card key={course.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>

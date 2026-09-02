@@ -50,7 +50,7 @@ export default function AdminLogsPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="container py-6 sm:py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">System Logs</h1>
         <p className="text-gray-600 mt-2">View all system activity and API calls</p>
@@ -76,10 +76,10 @@ export default function AdminLogsPage() {
           filteredLogs.map((log, index) => (
             <Card key={index}>
               <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
+                <div className="flex flex-col items-start gap-3 sm:flex-row sm:gap-4">
                   <Badge className={getLevelColor(log.level)}>{log.level}</Badge>
                   <div className="flex-1">
-                    <p className="font-mono text-sm">{log.message}</p>
+                    <p className="break-words font-mono text-sm">{log.message}</p>
                     <p className="text-gray-500 text-xs mt-1">
                       {new Date(log.timestamp).toLocaleString()} - {log.source}
                     </p>

@@ -14,7 +14,6 @@ from apps.courses.models import Course, Enrollment
 from apps.wallet.models import Wallet, Transaction, WithdrawalRequest
 from apps.payments.models import MpesaPayment
 import logging
-from threading import local
 
 # Shared storage for admin logs so API responses remain consistent across requests.
 LOG_STORAGE = []
@@ -365,6 +364,6 @@ def get_stats(request):
         'pending_withdrawals': pending_withdrawals,
         'monthly_revenue': monthly_revenue,
         'recent_users': recent_users_data,
-        'recent_withdrawals': recent_withdrawals.values('id', 'user__email', 'amount', 'status', 'created_at'),
-        'recent_transactions': recent_transactions.values('id', 'user__email', 'amount', 'transaction_type', 'status', 'created_at'),
+        'recent_withdrawals': list(recent_withdrawals.values('id', 'user__email', 'amount', 'status', 'created_at')),
+        'recent_transactions': list(recent_transactions.values('id', 'user__email', 'amount', 'transaction_type', 'status', 'created_at')),
     })

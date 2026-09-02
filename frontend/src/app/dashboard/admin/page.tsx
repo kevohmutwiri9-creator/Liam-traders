@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="container py-6 sm:py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-gray-600 mt-2">Real-time platform statistics</p>
@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardDescription>Total Earnings</CardDescription>
-            <CardTitle className="text-3xl">${stats?.total_earnings?.toFixed(2) || '0.00'}</CardTitle>
+            <CardTitle className="text-3xl">${Number(stats?.total_earnings || 0).toFixed(2)}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">Platform-wide</p>
@@ -68,6 +68,46 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">Open for applications</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardDescription>Surveys</CardDescription>
+            <CardTitle className="text-3xl">{stats?.total_surveys || 0}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600">{stats?.active_surveys || 0} active</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardDescription>Courses</CardDescription>
+            <CardTitle className="text-3xl">{stats?.total_courses || 0}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600">{stats?.total_enrollments || 0} enrollments</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardDescription>Task Submissions</CardDescription>
+            <CardTitle className="text-3xl">{stats?.total_submissions || 0}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600">{stats?.completed_tasks || 0} tasks completed</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardDescription>Monthly Revenue</CardDescription>
+            <CardTitle className="text-3xl">${Number(stats?.monthly_revenue || 0).toFixed(2)}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600">Last 30 days</p>
           </CardContent>
         </Card>
 

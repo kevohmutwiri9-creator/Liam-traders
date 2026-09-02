@@ -67,7 +67,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardDescription>Available Balance</CardDescription>
@@ -187,7 +187,7 @@ export default function DashboardPage() {
               </Button>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="bg-white p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Total Referrals</p>
                 <p className="text-2xl font-bold">{user?.total_referrals || 0}</p>
@@ -211,7 +211,7 @@ export default function DashboardPage() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 lg:grid-cols-4">
             <a href="/dashboard/tasks" className="p-4 border rounded-lg hover:bg-gray-50 transition">
               <h3 className="font-semibold">Browse Tasks</h3>
               <p className="text-sm text-gray-600">Find work that matches your skills</p>
