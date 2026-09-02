@@ -1,1 +1,1 @@
-web: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+web: python manage.py migrate --noinput && python manage.py ensure_site && python manage.py create_admin && python manage.py auto_generate_tasks && python manage.py auto_generate_courses && python manage.py auto_generate_surveys && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT

@@ -12,6 +12,9 @@ The following Django management commands are available for auto-generation:
 
 ## Setting Up Cron Jobs on Render
 
+The first task, course, and survey batches are generated during deployment. Keep the
+cron jobs below enabled afterward so the catalog continues to refresh automatically.
+
 ### Option 1: Render Cron Jobs (Recommended)
 
 Render supports cron jobs natively. Add the following to your `render.yaml` file:

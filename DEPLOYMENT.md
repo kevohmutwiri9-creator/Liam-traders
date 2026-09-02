@@ -39,7 +39,7 @@
    - **Region**: Same as your database
    - **Branch**: main
    - **Runtime**: Python 3
-   - **Build Command**: `pip install -r requirements.txt && python manage.py ensure_site && python manage.py migrate --noinput && python manage.py create_admin && python manage.py collectstatic --noinput`
+   - **Build Command**: `pip install -r requirements.txt && python manage.py ensure_site && python manage.py migrate --noinput && python manage.py create_admin && python manage.py auto_generate_tasks && python manage.py auto_generate_courses && python manage.py auto_generate_surveys && python manage.py collectstatic --noinput`
    - **Start Command**: `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 4`
 
 5. Add Environment Variables:
@@ -79,6 +79,7 @@
 The build command automatically handles:
 - Database migrations
 - Admin user creation (if ADMIN_EMAIL and ADMIN_PASSWORD are set)
+- Initial task, course, and survey generation from enabled templates
 - Static files collection
 
 1. **Test the Application**:
