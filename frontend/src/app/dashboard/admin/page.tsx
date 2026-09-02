@@ -11,10 +11,13 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        console.log('Fetching admin stats...');
         const res = await api.get('/admin-dashboard/stats/');
+        console.log('Admin stats response:', res.data);
         setStats(res.data);
       } catch (error: any) {
         console.error("Failed to fetch stats:", error);
+        console.error("Error response:", error.response?.data);
       } finally {
         setLoading(false);
       }
@@ -37,7 +40,7 @@ export default function AdminDashboardPage() {
         <p className="text-gray-600 mt-2">Real-time platform statistics</p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
         <Card>
           <CardHeader>
             <CardDescription>Total Users</CardDescription>
@@ -79,7 +82,7 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>

@@ -96,9 +96,9 @@ export default function AdminUsersPage() {
         {filteredUsers.map((user) => (
           <Card key={user.id}>
             <CardContent className="pt-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
                     <h3 className="font-semibold text-gray-900">{user.full_name || 'No name'}</h3>
                     <Badge variant={user.is_staff ? 'default' : 'secondary'}>
                       {user.is_staff ? 'Admin' : 'User'}
@@ -107,8 +107,8 @@ export default function AdminUsersPage() {
                       {user.is_active ? 'Active' : 'Banned'}
                     </Badge>
                   </div>
-                  <p className="text-gray-600 mb-3">{user.email}</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <p className="text-gray-600 mb-3 break-all">{user.email}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
                     <div>
                       <span className="text-gray-500">Level:</span>
                       <span className="ml-2 font-medium">{user.level}</span>
@@ -131,7 +131,7 @@ export default function AdminUsersPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex w-full flex-col gap-2 lg:w-56">
                   <select
                     value={user.level}
                     onChange={(e) => handleLevelChange(user.id, parseInt(e.target.value))}

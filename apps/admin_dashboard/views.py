@@ -16,9 +16,9 @@ from apps.payments.models import MpesaPayment
 import logging
 from threading import local
 
-# Thread-local storage for logs
-_log_storage = local()
-_log_storage.logs = []
+# Shared storage for admin logs so API responses remain consistent across requests.
+LOG_STORAGE = []
+
 
 class LogHandler(logging.Handler):
     def emit(self, record):
@@ -28,10 +28,10 @@ class LogHandler(logging.Handler):
             'message': self.format(record),
             'source': record.name,
         }
-        _log_storage.logs.append(log_entry)
+        LOG_STORAGE.append(log_entry)
         # Keep only last 1000 logs
-        if len(_log_storage.logs) > 1000:
-            _log_storage.logs = _log_storage.logs[-1000:]
+        if len(LOG_STORAGE) > 1000:
+            del LOG_STORAGE[:-1000]
 
 # Configure logging
 log_handler = LogHandler()
@@ -280,52 +280,91 @@ def unban_user(request, user_id):
 @permission_classes([IsAdminUser])
 def get_logs(request):
     """Get system logs (admin only)"""
-    return Response(_log_storage.logs)
+    return Response(LOG_STORAGE)
 
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def get_stats(request):
     """Get admin dashboard statistics (admin only)"""
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+
     total_users = User.objects.count()
-    new_users_today = User.objects.filter(created_at__date=timezone.now().date()).count()
-    
-    # Level distribution
+    new_users_today = User.objects.filter(created_at__date=today).count()
+    new_users_week = User.objects.filter(created_at__date__gte=week_ago).count()
+    new_users_month = User.objects.filter(created_at__date__gte=month_ago).count()
+
+    total_tasks = Task.objects.count()
+    active_tasks = Task.objects.filter(status='open').count()
+    completed_tasks = Task.objects.filter(status='completed').count()
+    total_submissions = TaskSubmission.objects.count()
+
+    total_surveys = Survey.objects.count()
+    active_surveys = Survey.objects.filter(status='active').count()
+    total_responses = SurveyResponse.objects.count()
+    pending_reviews = SurveyResponse.objects.filter(status='pending').count()
+
+    total_courses = Course.objects.filter(status='published').count()
+    total_enrollments = Enrollment.objects.count()
+    completed_enrollments = Enrollment.objects.filter(status='completed').count()
+
+    total_wallet_balance = Wallet.objects.aggregate(total=Sum('available_balance'))['total'] or 0
+    total_pending_balance = Wallet.objects.aggregate(total=Sum('pending_balance'))['total'] or 0
+    total_earnings = Wallet.objects.aggregate(total=Sum('total_earnings'))['total'] or 0
+    total_withdrawn = Wallet.objects.aggregate(total=Sum('total_withdrawn'))['total'] or 0
+    pending_withdrawals = WithdrawalRequest.objects.filter(status__in=['pending', 'processing']).count()
+
     level_distribution = []
     for level_num in range(1, 6):
         count = User.objects.filter(level=level_num).count()
         level_name = dict(User.LEVEL_CHOICES).get(level_num, f'Level {level_num}')
         level_distribution.append({'level': level_name, 'count': count})
-    
-    # Recent users
-    recent_users = User.objects.order_by('-created_at')[:5]
-    recent_users_data = []
-    for user in recent_users:
-        recent_users_data.append({
+
+    recent_users = User.objects.order_by('-created_at')[:10]
+    recent_users_data = [
+        {
             'id': user.id,
             'email': user.email,
             'full_name': user.full_name,
             'created_at': user.created_at.isoformat(),
-        })
-    
-    # Task stats
-    from apps.tasks.models import Task
-    active_tasks = Task.objects.filter(status='open').count()
-    
-    # Withdrawal stats
-    from apps.wallet.models import WithdrawalRequest
-    pending_withdrawals = WithdrawalRequest.objects.filter(status='pending').count()
-    
-    # Total earnings
-    from apps.wallet.models import Wallet
-    total_earnings = Wallet.objects.aggregate(total=Sum('total_earnings'))['total'] or 0
-    
+        }
+        for user in recent_users
+    ]
+
+    recent_withdrawals = WithdrawalRequest.objects.order_by('-created_at')[:10]
+    recent_transactions = Transaction.objects.order_by('-created_at')[:10]
+
+    monthly_revenue = Transaction.objects.filter(
+        created_at__date__gte=month_ago,
+        transaction_type__in=['earning', 'survey_reward', 'task_payment', 'course_earning'],
+    ).aggregate(total=Sum('net_amount'))['total'] or 0
+
     return Response({
         'total_users': total_users,
         'new_users_today': new_users_today,
+        'new_users_week': new_users_week,
+        'new_users_month': new_users_month,
         'level_distribution': level_distribution,
-        'recent_users': recent_users_data,
+        'total_tasks': total_tasks,
         'active_tasks': active_tasks,
-        'pending_withdrawals': pending_withdrawals,
+        'completed_tasks': completed_tasks,
+        'total_submissions': total_submissions,
+        'total_surveys': total_surveys,
+        'active_surveys': active_surveys,
+        'total_responses': total_responses,
+        'pending_reviews': pending_reviews,
+        'total_courses': total_courses,
+        'total_enrollments': total_enrollments,
+        'completed_enrollments': completed_enrollments,
+        'total_wallet_balance': total_wallet_balance,
+        'total_pending_balance': total_pending_balance,
         'total_earnings': total_earnings,
+        'total_withdrawn': total_withdrawn,
+        'pending_withdrawals': pending_withdrawals,
+        'monthly_revenue': monthly_revenue,
+        'recent_users': recent_users_data,
+        'recent_withdrawals': recent_withdrawals.values('id', 'user__email', 'amount', 'status', 'created_at'),
+        'recent_transactions': recent_transactions.values('id', 'user__email', 'amount', 'transaction_type', 'status', 'created_at'),
     })
