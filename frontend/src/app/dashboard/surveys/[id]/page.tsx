@@ -31,7 +31,8 @@ export default function SurveyDetailPage() {
           surveysAPI.getSurveyQuestions(surveyId),
         ]);
         setSurvey(surveyRes.data);
-        setQuestions(questionsRes.data);
+        const questionData = questionsRes.data;
+        setQuestions(Array.isArray(questionData) ? questionData : questionData.results || []);
       } catch (error) {
         console.error("Failed to fetch survey:", error);
         setLoadError("This survey could not be loaded. Please return to the survey list and try again.");
@@ -64,6 +65,8 @@ export default function SurveyDetailPage() {
   };
 
   const renderQuestion = (question: any) => {
+    const options = Array.isArray(question.options) ? question.options : [];
+
     switch (question.question_type) {
       case 'text':
         return (
@@ -90,7 +93,7 @@ export default function SurveyDetailPage() {
             value={answers[question.id] || ''}
             onValueChange={(value) => handleAnswerChange(question.id, value)}
           >
-            {question.options.map((option: string, idx: number) => (
+            {options.map((option: string, idx: number) => (
               <div key={idx} className="flex items-center space-x-2">
                 <RadioGroupItem value={option} id={`q${question.id}-opt${idx}`} />
                 <Label htmlFor={`q${question.id}-opt${idx}`}>{option}</Label>
@@ -101,7 +104,7 @@ export default function SurveyDetailPage() {
       case 'checkbox':
         return (
           <div className="space-y-2">
-            {question.options.map((option: string, idx: number) => (
+            {options.map((option: string, idx: number) => (
               <div key={idx} className="flex items-center space-x-2">
                 <Checkbox
                   id={`q${question.id}-opt${idx}`}
@@ -146,7 +149,7 @@ export default function SurveyDetailPage() {
             required={question.is_required}
           >
             <option value="">Select an option...</option>
-            {question.options.map((option: string, idx: number) => (
+            {options.map((option: string, idx: number) => (
               <option key={idx} value={option}>{option}</option>
             ))}
           </select>
