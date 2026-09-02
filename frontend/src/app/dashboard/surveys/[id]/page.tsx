@@ -22,6 +22,8 @@ export default function SurveyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [startedAt] = useState(() => Date.now());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,12 +55,21 @@ export default function SurveyDetailPage() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError("");
     try {
-      await surveysAPI.submitSurvey(surveyId, { answers });
+      const completionTimeSeconds = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
+      await surveysAPI.submitSurvey(surveyId, {
+        answers,
+        completion_time_seconds: completionTimeSeconds,
+      });
       router.push("/dashboard/surveys?success=true");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to submit survey:", error);
-      alert("Failed to submit survey. Please try again.");
+      const responseError = error.response?.data;
+      const message = typeof responseError === "string"
+        ? responseError
+        : responseError?.detail || responseError?.non_field_errors?.[0] || "Failed to submit survey. Please try again.";
+      setSubmitError(message);
     } finally {
       setSubmitting(false);
     }
@@ -204,6 +215,11 @@ export default function SurveyDetailPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {submitError && (
+            <div className="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+              {submitError}
+            </div>
+          )}
           <div className="space-y-8">
             {questions.map((question: any, idx: number) => (
               <div key={question.id}>

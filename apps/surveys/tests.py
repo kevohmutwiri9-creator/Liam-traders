@@ -41,3 +41,16 @@ class SurveyQuestionsApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('results', response.json())
         self.assertEqual(len(response.json()['results']), 1)
+
+    def test_submit_survey_accepts_completion_time(self):
+        response = self.client.post(
+            f'/api/surveys/{self.survey.id}/submit/',
+            {
+                'answers': {'1': 'It is useful'},
+                'completion_time_seconds': 45,
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['message'], 'Survey submitted successfully')
