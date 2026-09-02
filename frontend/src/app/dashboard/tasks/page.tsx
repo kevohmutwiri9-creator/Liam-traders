@@ -14,12 +14,17 @@ export default function TasksPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        console.info('[TasksPage] token present:', Boolean(token));
+        console.info('[TasksPage] API base URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
+
         const res = await tasksAPI.getTasks({ status: 'open' });
         console.log('Tasks API response:', res.data);
         setTasks(res.data);
       } catch (error: any) {
         console.error("Failed to fetch tasks:", error);
         console.error("Error response:", error.response?.data);
+        setTasks({ count: 0, next: null, previous: null, results: [] });
       } finally {
         setLoading(false);
       }

@@ -9,14 +9,39 @@ const api = axios.create({
   },
 });
 
-// Add token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const currentApiUrl = (config.baseURL || API_URL) || 'unknown';
+
+  if (typeof window !== 'undefined') {
+    console.info('[API]', config.method?.toUpperCase(), `${currentApiUrl}${config.url ?? ''}`);
+    console.info('[API] Auth token present:', Boolean(token));
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else if (typeof window !== 'undefined') {
+    console.warn('[API] No auth token found for request to', `${currentApiUrl}${config.url ?? ''}`);
   }
+
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== 'undefined') {
+      console.error('[API] Request failed:', {
+        url: error?.config?.url,
+        status: error?.response?.status,
+        data: error?.response?.data,
+        baseURL: error?.config?.baseURL,
+        hasToken: Boolean(localStorage.getItem('token')),
+      });
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Auth API
 export const authAPI = {

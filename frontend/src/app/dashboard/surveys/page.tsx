@@ -14,12 +14,17 @@ export default function SurveysPage() {
   useEffect(() => {
     const fetchSurveys = async () => {
       try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        console.info('[SurveysPage] token present:', Boolean(token));
+        console.info('[SurveysPage] API base URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
+
         const res = await surveysAPI.getSurveys({ status: 'active' });
         console.log('Surveys API response:', res.data);
         setSurveys(res.data);
       } catch (error: any) {
         console.error("Failed to fetch surveys:", error);
         console.error("Error response:", error.response?.data);
+        setSurveys({ count: 0, next: null, previous: null, results: [] });
       } finally {
         setLoading(false);
       }

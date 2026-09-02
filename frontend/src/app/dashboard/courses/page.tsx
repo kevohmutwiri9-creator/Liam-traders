@@ -14,12 +14,17 @@ export default function CoursesPage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        console.info('[CoursesPage] token present:', Boolean(token));
+        console.info('[CoursesPage] API base URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api');
+
         const res = await coursesAPI.getCourses({ status: 'published' });
         console.log('Courses API response:', res.data);
         setCourses(res.data);
       } catch (error: any) {
         console.error("Failed to fetch courses:", error);
         console.error("Error response:", error.response?.data);
+        setCourses({ count: 0, next: null, previous: null, results: [] });
       } finally {
         setLoading(false);
       }

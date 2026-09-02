@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -150,9 +152,10 @@ class User(AbstractUser):
     
     def add_referral_earning(self, amount):
         """Add referral earnings to user's balance"""
-        self.referral_earnings += amount
-        self.available_balance += amount
-        self.total_earnings += amount
+        normalized_amount = Decimal(str(amount))
+        self.referral_earnings += normalized_amount
+        self.available_balance += normalized_amount
+        self.total_earnings += normalized_amount
         self.save()
 
 

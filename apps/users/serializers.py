@@ -8,54 +8,69 @@ User = get_user_model()
 
 class UserCreateSerializer(BaseUserCreateSerializer):
     full_name = serializers.CharField(required=True, max_length=255)
-    referral_code = serializers.CharField(required=False, max_length=20, allow_blank=True)
-    
+    re_password = serializers.CharField(required=True, write_only=True)
+    referral_code = serializers.CharField(required=False, max_length=20, allow_blank=True, trim_whitespace=True)
+
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
         fields = ['id', 'email', 'full_name', 'phone_number', 'password', 're_password', 'referral_code']
-    
+
     def validate_referral_code(self, value):
-        """Validate referral code if provided"""
-        if value:
-            try:
-                referrer = User.objects.get(referral_code=value)
-                return referrer
-            except User.DoesNotExist:
-                raise serializers.ValidationError("Invalid referral code")
-        return None
-    
-    def create(self, validated_data):
-        referral_code = validated_data.pop('referral_code', None)
-        referrer = None
-        
+        """Accept a referral code string and ignore invalid inputs."""
+        if not value or not value.strip():
+            return ''
+
+        code = value.strip()
+        if not User.objects.filter(referral_code=code).exists():
+            return ''
+        return code
+
+    def validate(self, attrs):
+        re_password = attrs.pop('re_password', None)
+
+        if re_password is not None and attrs.get('password') != re_password:
+            raise serializers.ValidationError({'re_password': 'Passwords must match.'})
+
+        attrs = super().validate(attrs)
+        referral_code = attrs.get('referral_code')
+        self.referrer = None
+
         if referral_code:
             try:
-                referrer = User.objects.get(referral_code=referral_code)
-                validated_data['referred_by'] = referrer
+                self.referrer = User.objects.get(referral_code=referral_code)
             except User.DoesNotExist:
-                pass  # Invalid referral code, just ignore
-        
+                self.referrer = None
+
+        return attrs
+
+    def create(self, validated_data):
+        referral_code = validated_data.pop('referral_code', '')
+        referrer = getattr(self, 'referrer', None)
+
         user = User.objects.create_user(**validated_data)
-        
+        if referrer:
+            user.referred_by = referrer
+            user.save(update_fields=['referred_by'])
+
         # Generate referral code for new user
         user.generate_referral_code()
-        
+
         # Award referral bonus to referrer based on tier
         if referrer:
             from django.conf import settings
             bonus_tiers = getattr(settings, 'REFERRAL_BONUS_TIERS', {1: 50.00})
-            
+
             # Calculate bonus based on referrer's current tier
             current_bonus = bonus_tiers.get(1, 50.00)
             for threshold, bonus in sorted(bonus_tiers.items(), reverse=True):
                 if referrer.total_referrals >= threshold:
                     current_bonus = bonus
                     break
-            
+
             referrer.add_referral_earning(current_bonus)
             referrer.total_referrals += 1
             referrer.save()
-        
+
         return user
 
 
