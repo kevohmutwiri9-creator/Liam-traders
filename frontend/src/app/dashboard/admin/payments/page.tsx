@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { paymentsAPI } from "@/lib/api";
+import { getCollectionResults, paymentsAPI } from "@/lib/api";
 
 export default function AdminPaymentsPage() {
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
@@ -22,7 +22,7 @@ export default function AdminPaymentsPage() {
     try {
       setLoading(true);
       const response = await paymentsAPI.getPendingPayments();
-      setPendingPayments(response.data.payments || []);
+      setPendingPayments(getCollectionResults(response.data));
     } catch (err: any) {
       if (err.response?.status === 403) {
         setError("You don't have permission to access this page");

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { userAPI, paymentsAPI } from "@/lib/api";
+import { getCollectionResults, userAPI, paymentsAPI } from "@/lib/api";
 
 const LEVEL_PRICES = {
   1: 0,
@@ -47,7 +47,7 @@ export default function LevelUpgradePage() {
         paymentsAPI.getMyPayments(),
       ]);
       setUser(profileRes.data);
-      setMyPayments(paymentsRes.data);
+      setMyPayments(getCollectionResults(paymentsRes.data));
       
       // Set default to next level
       const nextLevel = profileRes.data.level + 1;

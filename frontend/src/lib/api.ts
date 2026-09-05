@@ -2,6 +2,13 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
+export function getCollectionResults<T = any>(data: any): T[] {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data?.payments)) return data.payments;
+  return [];
+}
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
