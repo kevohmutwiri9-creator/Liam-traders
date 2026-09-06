@@ -1,6 +1,10 @@
-from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from decimal import Decimal
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from rest_framework import serializers
+
 from .models import Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 
 User = get_user_model()
@@ -160,6 +164,21 @@ class LevelUpgradePaymentSerializer(serializers.ModelSerializer):
         if value > 5:
             raise serializers.ValidationError("Maximum level is 5")
         return value
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        user = request.user if request else None
+        if user is None:
+            raise serializers.ValidationError('A user is required for level upgrades.')
+
+        activation_fee = getattr(settings, 'ACTIVATION_FEE', 200)
+        amount = attrs.get('amount')
+        if amount is None:
+            attrs['amount'] = Decimal(str(activation_fee))
+        if Decimal(str(amount)) != Decimal(str(activation_fee)):
+            raise serializers.ValidationError({'amount': f'Activation fee must be {activation_fee}.'})
+
+        return attrs
 
 
 class PaymentApprovalSerializer(serializers.Serializer):

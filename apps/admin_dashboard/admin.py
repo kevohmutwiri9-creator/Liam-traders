@@ -142,7 +142,7 @@ liam_admin.register(User, UserAdmin)
 liam_admin.register(Group, GroupAdmin)
 
 # Register app models
-from apps.users.admin import User as CustomUser, Skill, Education, WorkExperience, Notification
+from apps.users.admin import User as CustomUser, Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 from apps.tasks.admin import Task, TaskApplication, TaskSubmission, TaskReview, Milestone
 from apps.surveys.admin import Survey, Question, SurveyResponse, SurveyPartner
 from apps.courses.admin import Course, Lesson, Enrollment, LessonProgress, CourseReview, Assessment, AssessmentAttempt, InstructorProfile
@@ -154,6 +154,7 @@ liam_admin.register(Skill)
 liam_admin.register(Education)
 liam_admin.register(WorkExperience)
 liam_admin.register(Notification)
+liam_admin.register(LevelUpgradePayment)
 
 liam_admin.register(Task)
 liam_admin.register(TaskApplication)

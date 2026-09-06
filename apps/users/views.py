@@ -273,6 +273,7 @@ class PaymentApprovalView(generics.UpdateAPIView):
                     # Send notification to user
                     Notification.objects.create(
                         user=payment.user,
+                        type='level',
                         title='Level Upgrade Approved',
                         message=f'Your level upgrade to {dict(User.LEVEL_CHOICES).get(payment.target_level)} has been approved!',
                         notification_type='level_upgrade',
@@ -291,6 +292,7 @@ class PaymentApprovalView(generics.UpdateAPIView):
                     # Send notification to user
                     Notification.objects.create(
                         user=payment.user,
+                        type='payment',
                         title='Level Upgrade Rejected',
                         message=f'Your level upgrade request has been rejected. Reason: {notes or "Not specified"}',
                         notification_type='level_upgrade',

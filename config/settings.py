@@ -224,6 +224,7 @@ MPESA_SHORTCODE = config('MPESA_SHORTCODE', default='')
 MPESA_ENVIRONMENT = config('MPESA_ENVIRONMENT', default='sandbox')
 
 # Payment Configuration
+ACTIVATION_FEE = 200
 MINIMUM_WITHDRAWAL = 100  # KES
 WITHDRAWAL_FEE_PERCENTAGE = 0.02  # 2% fee
 PLATFORM_FEE_PERCENTAGE = 0.10  # 10% platform fee on earnings

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Skill, Education, WorkExperience, Notification
+from .models import User, Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 
 
 @admin.register(User)
@@ -53,3 +53,15 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ['user', 'type', 'title', 'is_read', 'created_at']
     list_filter = ['type', 'is_read']
     search_fields = ['title', 'user__email']
+
+
+@admin.register(LevelUpgradePayment)
+class LevelUpgradePaymentAdmin(admin.ModelAdmin):
+    list_display = ['user', 'target_level', 'amount', 'transaction_reference', 'status', 'created_at']
+    list_filter = ['status', 'target_level', 'created_at']
+    search_fields = ['user__email', 'user__full_name', 'transaction_reference']
+    readonly_fields = ['created_at', 'updated_at', 'processed_at']
+    fieldsets = (
+        (None, {'fields': ('user', 'target_level', 'amount', 'transaction_reference', 'status')}),
+        ('Admin review', {'fields': ('admin_notes', 'processed_by', 'processed_at')}),
+    )

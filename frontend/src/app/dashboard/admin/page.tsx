@@ -1,20 +1,33 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null);
+  const [pendingPayments, setPendingPayments] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         console.log('Fetching admin stats...');
-        const res = await api.get('/admin-dashboard/stats/');
-        console.log('Admin stats response:', res.data);
-        setStats(res.data);
+        const [statsRes, pendingRes] = await Promise.all([
+          api.get('/admin-dashboard/stats/'),
+          api.get('/users/payments/pending/'),
+        ]);
+        console.log('Admin stats response:', statsRes.data);
+        setStats(statsRes.data);
+
+        const pendingCount = typeof pendingRes.data?.total === 'number'
+          ? pendingRes.data.total
+          : Array.isArray(pendingRes.data?.payments)
+            ? pendingRes.data.payments.length
+            : 0;
+        setPendingPayments(pendingCount);
       } catch (error: any) {
         console.error("Failed to fetch stats:", error);
         console.error("Error response:", error.response?.data);
@@ -41,6 +54,21 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+        <Card className="border-yellow-200 bg-yellow-50/40">
+          <CardHeader>
+            <CardDescription>Pending Activation Verifications</CardDescription>
+            <CardTitle className="text-3xl">{pendingPayments}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-yellow-700">Level upgrade payments waiting for admin review</p>
+              <Link href="/dashboard/admin/payments">
+                <Button variant="outline" size="sm">Review</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardDescription>Total Users</CardDescription>

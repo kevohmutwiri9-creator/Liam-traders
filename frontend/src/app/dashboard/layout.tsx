@@ -103,6 +103,9 @@ export default function DashboardLayout({
                   <Link href="/dashboard/admin/users" className="text-gray-600 hover:text-gray-900" onClick={() => setMobileMenuOpen(false)}>
                     Users
                   </Link>
+                  <Link href="/dashboard/admin/payments" className="text-gray-600 hover:text-gray-900" onClick={() => setMobileMenuOpen(false)}>
+                    Payments
+                  </Link>
                   <Link href="/dashboard/admin/logs" className="text-gray-600 hover:text-gray-900" onClick={() => setMobileMenuOpen(false)}>
                     Logs
                   </Link>

@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -266,7 +267,7 @@ class LevelUpgradePayment(models.Model):
             return False
         
         self.status = 'approved'
-        self.processed_at = models.timezone.now()
+        self.processed_at = timezone.now()
         self.processed_by = admin_user
         self.save()
         
@@ -293,7 +294,7 @@ class LevelUpgradePayment(models.Model):
         
         self.status = 'rejected'
         self.admin_notes = notes
-        self.processed_at = models.timezone.now()
+        self.processed_at = timezone.now()
         self.processed_by = admin_user
         self.save()
         
