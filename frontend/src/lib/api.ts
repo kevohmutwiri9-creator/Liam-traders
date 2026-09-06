@@ -36,14 +36,78 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
+    const hasToken = typeof window !== 'undefined' ? Boolean(localStorage.getItem('token')) : false;
+
+    if (typeof window !== 'undefined') {
+      console.debug('[API] 401 Handler:', {
+        status: error?.response?.status,
+        hasRefreshToken: Boolean(refreshToken),
+        hasToken,
+        isRetry: originalRequest?._retry,
+        url: originalRequest?.url,
+        willAttemptRefresh: !!(
+          error.response?.status === 401 &&
+          refreshToken &&
+          originalRequest &&
+          !originalRequest._retry &&
+          !originalRequest.url?.includes('/auth/jwt/')
+        ),
+      });
+    }
+
+    if (
+      error.response?.status === 401 &&
+      refreshToken &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/jwt/')
+    ) {
+      originalRequest._retry = true;
+
+      if (typeof window !== 'undefined') {
+        console.log('[API] Attempting token refresh...');
+      }
+
+      try {
+        const refreshResponse = await api.post('/auth/jwt/refresh/', { refresh: refreshToken });
+        const accessToken = refreshResponse.data.access;
+
+        if (typeof window !== 'undefined') {
+          console.log('[API] Token refresh successful');
+        }
+
+        localStorage.setItem('token', accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return api(originalRequest);
+      } catch (refreshError: any) {
+        if (typeof window !== 'undefined') {
+          console.error('[API] Token refresh failed:', {
+            status: refreshError?.response?.status,
+            data: refreshError?.response?.data,
+            message: refreshError?.message,
+          });
+        }
+        localStorage.removeItem('token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        
+        if (typeof window !== 'undefined') {
+          console.info('[API] Session cleared due to refresh failure');
+        }
+      }
+    }
+
     if (typeof window !== 'undefined') {
       console.error('[API] Request failed:', {
         url: error?.config?.url,
         status: error?.response?.status,
         data: error?.response?.data,
         baseURL: error?.config?.baseURL,
-        hasToken: Boolean(localStorage.getItem('token')),
+        hasToken,
+        isRefreshEndpoint: error?.config?.url?.includes('/auth/jwt/'),
       });
     }
     return Promise.reject(error);
