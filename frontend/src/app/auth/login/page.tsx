@@ -37,7 +37,11 @@ export default function LoginPage() {
       const user = userResponse.data;
       
       setAuth(user, access);
-      router.push("/dashboard");
+      const nextPath = typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("next")
+        : null;
+      const destination = nextPath && nextPath.startsWith("/") ? nextPath : "/dashboard";
+      router.push(destination);
     } catch (err: any) {
       setError(err.response?.data?.detail || "Login failed. Please try again.");
     } finally {
