@@ -20,6 +20,7 @@ interface User {
   date_of_birth?: string;
   is_staff?: boolean;
   is_active?: boolean;
+  is_activated?: boolean;
 }
 
 interface AuthState {

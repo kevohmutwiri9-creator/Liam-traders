@@ -12,10 +12,10 @@ const ACTIVATION_FEE = 200;
 
 const LEVEL_PRICES = {
   1: 0,
-  2: ACTIVATION_FEE,
-  3: ACTIVATION_FEE,
-  4: ACTIVATION_FEE,
-  5: ACTIVATION_FEE,
+  2: 500,
+  3: 1000,
+  4: 2000,
+  5: 5000,
 };
 
 const LEVEL_NAMES = {
@@ -70,8 +70,11 @@ export default function LevelUpgradePage() {
 
     try {
       await paymentsAPI.submitLevelPayment({
-        target_level: selectedLevel,
-        amount: ACTIVATION_FEE,
+        payment_type: user?.is_activated ? "upgrade" : "activation",
+        target_level: user?.is_activated ? selectedLevel : 1,
+        amount: user?.is_activated
+          ? LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES]
+          : ACTIVATION_FEE,
         transaction_reference: transactionRef,
       });
       
@@ -118,15 +121,15 @@ export default function LevelUpgradePage() {
         <Card>
           <CardHeader>
             <CardTitle>Payment Instructions</CardTitle>
-            <CardDescription>
-              Pay via Equity PayBill to upgrade your level
-            </CardDescription>
+              <CardDescription>
+                {user?.is_activated ? "Pay via Equity PayBill to upgrade your level" : "Activate your account before accessing paid opportunities"}
+              </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
               <div className="flex justify-between items-center">
-                <span className="font-semibold">Activation Fee:</span>
-                <span className="font-mono text-lg">KSh {ACTIVATION_FEE}</span>
+                <span className="font-semibold">{user?.is_activated ? "Selected Level Fee:" : "Activation Fee:"}</span>
+                <span className="font-mono text-lg">KSh {user?.is_activated ? LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES] : ACTIVATION_FEE}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-semibold">PayBill Number:</span>
@@ -145,7 +148,7 @@ export default function LevelUpgradePage() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            {user?.is_activated && <div className="space-y-2">
               <h3 className="font-semibold">Level Pricing:</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {[2, 3, 4, 5].map((level) => (
@@ -160,11 +163,11 @@ export default function LevelUpgradePage() {
                   >
                     <div className="font-semibold">Level {level}</div>
                     <div className="text-sm text-gray-600">{LEVEL_NAMES[level as keyof typeof LEVEL_NAMES]}</div>
-                    <div className="font-bold text-primary-600">KSh {ACTIVATION_FEE}</div>
+                    <div className="font-bold text-primary-600">KSh {LEVEL_PRICES[level as keyof typeof LEVEL_PRICES]}</div>
                   </div>
                 ))}
               </div>
-            </div>
+            </div>}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -185,7 +188,7 @@ export default function LevelUpgradePage() {
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
                 <p className="font-semibold text-yellow-800">Important:</p>
                 <ul className="list-disc list-inside text-yellow-700 mt-1 space-y-1">
-                  <li>Ensure you've paid the exact amount for your selected level</li>
+                  <li>Ensure you've paid the exact amount shown above</li>
                   <li>Use the correct PayBill number: 247247</li>
                   <li>Use account number: 0763613955</li>
                   <li>Submit the transaction reference immediately after payment</li>
@@ -210,7 +213,9 @@ export default function LevelUpgradePage() {
                 className="w-full"
                 disabled={submitting || !transactionRef}
               >
-                {submitting ? "Submitting..." : `Submit Payment (KSh ${LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES]})`}
+                {submitting ? "Submitting..." : user?.is_activated
+                  ? `Submit Level ${selectedLevel} Payment (KSh ${LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES]})`
+                  : `Submit Activation Payment (KSh ${ACTIVATION_FEE})`}
               </Button>
             </form>
           </CardContent>

@@ -94,11 +94,11 @@ class NotificationAdmin(admin.ModelAdmin):
 
 @admin.register(LevelUpgradePayment)
 class LevelUpgradePaymentAdmin(admin.ModelAdmin):
-    list_display = ['user', 'target_level', 'amount', 'transaction_reference', 'status', 'created_at']
-    list_filter = ['status', 'target_level', 'created_at']
+    list_display = ['user', 'payment_type', 'target_level', 'amount', 'transaction_reference', 'status', 'created_at']
+    list_filter = ['payment_type', 'status', 'target_level', 'created_at']
     search_fields = ['user__email', 'user__full_name', 'transaction_reference']
     readonly_fields = ['created_at', 'updated_at', 'processed_at']
     fieldsets = (
-        (None, {'fields': ('user', 'target_level', 'amount', 'transaction_reference', 'status')}),
+        (None, {'fields': ('user', 'payment_type', 'target_level', 'amount', 'transaction_reference', 'status')}),
         ('Admin review', {'fields': ('admin_notes', 'processed_by', 'processed_at')}),
     )

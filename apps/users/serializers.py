@@ -84,7 +84,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'full_name', 'phone_number', 'profile_picture',
             'bio', 'location', 'level', 'total_tasks_completed', 'quality_score',
-            'specialization', 'skills', 'is_identity_verified', 'total_earnings',
+            'specialization', 'skills', 'is_identity_verified', 'is_activated', 'total_earnings',
             'available_balance', 'pending_balance', 'reputation_score',
             'positive_reviews', 'negative_reviews', 'created_at',
             'referral_code', 'referral_earnings', 'total_referrals'
@@ -147,7 +147,7 @@ class LevelUpgradeSerializer(serializers.Serializer):
 class LevelUpgradePaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = LevelUpgradePayment
-        fields = ['id', 'user', 'target_level', 'amount', 'transaction_reference', 'status', 'created_at']
+        fields = ['id', 'user', 'payment_type', 'target_level', 'amount', 'transaction_reference', 'status', 'created_at']
         read_only_fields = ['id', 'user', 'status', 'created_at']
     
     def validate_transaction_reference(self, value):
@@ -159,6 +159,10 @@ class LevelUpgradePaymentSerializer(serializers.ModelSerializer):
     def validate_target_level(self, value):
         """Validate target level"""
         user = self.context['request'].user
+        if self.initial_data.get('payment_type') == 'activation':
+            if value != 1:
+                raise serializers.ValidationError('Activation payments must target Level 1.')
+            return value
         if value <= user.level:
             raise serializers.ValidationError(f"You are already at Level {user.level} or higher")
         if value > 5:
@@ -171,12 +175,18 @@ class LevelUpgradePaymentSerializer(serializers.ModelSerializer):
         if user is None:
             raise serializers.ValidationError('A user is required for level upgrades.')
 
+        payment_type = attrs.get('payment_type', 'upgrade')
         activation_fee = getattr(settings, 'ACTIVATION_FEE', 200)
+        upgrade_prices = getattr(settings, 'LEVEL_UPGRADE_PRICES', {2: 500, 3: 1000, 4: 2000, 5: 5000})
         amount = attrs.get('amount')
+        if payment_type == 'activation' and user.is_activated:
+            raise serializers.ValidationError({'payment_type': 'This account is already activated.'})
+        expected_amount = activation_fee if payment_type == 'activation' else upgrade_prices.get(attrs['target_level'])
         if amount is None:
-            attrs['amount'] = Decimal(str(activation_fee))
-        if Decimal(str(amount)) != Decimal(str(activation_fee)):
-            raise serializers.ValidationError({'amount': f'Activation fee must be {activation_fee}.'})
+            attrs['amount'] = Decimal(str(expected_amount))
+        if Decimal(str(amount)) != Decimal(str(expected_amount)):
+            label = 'Activation fee' if payment_type == 'activation' else f'Level {attrs["target_level"]} upgrade fee'
+            raise serializers.ValidationError({'amount': f'{label} must be {expected_amount}.'})
 
         return attrs
 

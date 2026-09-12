@@ -78,6 +78,7 @@ class User(AbstractUser):
     
     # Verification
     is_identity_verified = models.BooleanField(default=False)
+    is_activated = models.BooleanField(default=False)
     identity_document = models.FileField(upload_to='identity_documents/', blank=True, null=True)
     
     # Statistics
@@ -238,6 +239,11 @@ class Notification(models.Model):
 
 
 class LevelUpgradePayment(models.Model):
+    PAYMENT_TYPES = [
+        ('activation', 'Activation'),
+        ('upgrade', 'Level Upgrade'),
+    ]
+
     PAYMENT_STATUS = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -245,6 +251,7 @@ class LevelUpgradePayment(models.Model):
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='level_payments')
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='upgrade')
     target_level = models.IntegerField(choices=User.LEVEL_CHOICES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     transaction_reference = models.CharField(max_length=100, unique=True)
@@ -259,7 +266,7 @@ class LevelUpgradePayment(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.user.email} - Level {self.target_level} - {self.transaction_reference}"
+        return f"{self.user.email} - {self.payment_type} - {self.transaction_reference}"
     
     def approve(self, admin_user):
         """Approve payment and upgrade user level"""
@@ -271,20 +278,28 @@ class LevelUpgradePayment(models.Model):
         self.processed_by = admin_user
         self.save()
         
-        # Upgrade user level
-        if self.user.level < self.target_level:
-            self.user.level = self.target_level
-            self.user.save()
-        
+        if self.payment_type == 'activation':
+            self.user.is_activated = True
+            self.user.save(update_fields=['is_activated', 'updated_at'])
+            title = 'Activation Approved'
+            message = 'Your activation payment has been approved. Your account is now active.'
+        else:
+            # Upgrade user level
+            if self.user.level < self.target_level:
+                self.user.level = self.target_level
+                self.user.save(update_fields=['level', 'updated_at'])
+            title = 'Level Upgrade Approved'
+            message = f'Your payment for Level {self.target_level} has been approved. Your level has been upgraded!'
+
         # Create notification
         Notification.objects.create(
             user=self.user,
             type='level',
-            title='Level Upgrade Approved',
-            message=f'Your payment for Level {self.target_level} has been approved. Your level has been upgraded!',
+            title=title,
+            message=message,
             action_url='/dashboard'
         )
-        
+
         return True
     
     def reject(self, admin_user, notes=''):

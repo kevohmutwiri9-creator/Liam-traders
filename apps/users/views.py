@@ -316,6 +316,7 @@ def pending_payments(request):
             },
             'target_level': payment.target_level,
             'target_level_name': dict(User.LEVEL_CHOICES).get(payment.target_level),
+            'payment_type': payment.payment_type,
             'amount': float(payment.amount),
             'transaction_reference': payment.transaction_reference,
             'status': payment.status,

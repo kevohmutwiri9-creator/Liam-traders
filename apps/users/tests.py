@@ -10,7 +10,7 @@ from apps.seed_content import ensure_demo_content
 from apps.surveys.models import QuestionBank, SurveyTemplate
 from apps.tasks.models import TaskTemplate
 from apps.users.models import LevelUpgradePayment, User
-from apps.users.serializers import UserCreateSerializer
+from apps.users.serializers import LevelUpgradePaymentSerializer, UserCreateSerializer
 from apps.users.views import PaymentApprovalView
 
 
@@ -77,6 +77,60 @@ class DemoContentSeedTests(TestCase):
 
 
 class PaymentApprovalFlowTests(TestCase):
+    def test_activation_and_upgrade_fees_are_distinct(self):
+        user = User.objects.create_user(
+            email='fees@example.com',
+            password='StrongPass123!',
+            full_name='Fee User',
+        )
+
+        activation = LevelUpgradePaymentSerializer(
+            data={
+                'payment_type': 'activation',
+                'target_level': 1,
+                'transaction_reference': 'TX-ACTIVATE-001',
+                'amount': 200,
+            },
+            context={'request': type('Request', (), {'user': user})()},
+        )
+        self.assertTrue(activation.is_valid(), activation.errors)
+
+        upgrade = LevelUpgradePaymentSerializer(
+            data={
+                'payment_type': 'upgrade',
+                'target_level': 2,
+                'transaction_reference': 'TX-UPGRADE-001',
+                'amount': 500,
+            },
+            context={'request': type('Request', (), {'user': user})()},
+        )
+        self.assertTrue(upgrade.is_valid(), upgrade.errors)
+
+    def test_activation_approval_marks_user_activated(self):
+        admin = User.objects.create_user(
+            email='activation-admin@example.com',
+            password='StrongPass123!',
+            full_name='Activation Admin',
+            is_staff=True,
+        )
+        user = User.objects.create_user(
+            email='activation-user@example.com',
+            password='StrongPass123!',
+            full_name='Activation User',
+        )
+        payment = LevelUpgradePayment.objects.create(
+            user=user,
+            payment_type='activation',
+            target_level=1,
+            amount=Decimal('200.00'),
+            transaction_reference='TX-ACTIVATE-002',
+        )
+
+        self.assertTrue(payment.approve(admin))
+        user.refresh_from_db()
+        self.assertTrue(user.is_activated)
+        self.assertEqual(user.level, 1)
+
     def test_admin_approval_creates_notification_and_updates_level(self):
         admin = User.objects.create_user(
             email='admin@example.com',

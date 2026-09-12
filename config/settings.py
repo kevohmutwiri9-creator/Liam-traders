@@ -230,6 +230,12 @@ MPESA_ENVIRONMENT = config('MPESA_ENVIRONMENT', default='sandbox')
 
 # Payment Configuration
 ACTIVATION_FEE = 200
+LEVEL_UPGRADE_PRICES = {
+    2: 500,
+    3: 1000,
+    4: 2000,
+    5: 5000,
+}
 MINIMUM_WITHDRAWAL = 100  # KES
 WITHDRAWAL_FEE_PERCENTAGE = 0.02  # 2% fee
 PLATFORM_FEE_PERCENTAGE = 0.10  # 10% platform fee on earnings
