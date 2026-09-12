@@ -21,6 +21,9 @@ class TaskListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['budget', 'deadline', 'created_at']
     
     def get_queryset(self):
+        from apps.seed_content import ensure_generated_content
+
+        ensure_generated_content()
         logger.info(f"=== TASKS API CALLED ===")
         logger.info(f"User: {self.request.user.email}, Level: {self.request.user.level}")
         logger.info(f"Query params: {self.request.query_params}")

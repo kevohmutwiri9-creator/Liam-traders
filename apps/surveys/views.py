@@ -20,6 +20,9 @@ class SurveyListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['reward_amount', 'start_date', 'end_date']
     
     def get_queryset(self):
+        from apps.seed_content import ensure_generated_content
+
+        ensure_generated_content()
         logger.info(f"=== SURVEYS API CALLED ===")
         logger.info(f"User: {self.request.user.email}, Level: {self.request.user.level}")
         logger.info(f"Query params: {self.request.query_params}")

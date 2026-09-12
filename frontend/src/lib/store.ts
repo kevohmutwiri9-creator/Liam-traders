@@ -66,9 +66,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: null, token: null, isAuthenticated: false, isInitialized: true });
   },
   updateUser: (updatedUser) => {
-    set((state) => ({
-      user: state.user ? { ...state.user, ...updatedUser } : null,
-    }));
+    set((state) => {
+      const user = state.user ? { ...state.user, ...updatedUser } : null;
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+      return { user };
+    });
   },
   refreshUser: async () => {
     const { token } = get();
