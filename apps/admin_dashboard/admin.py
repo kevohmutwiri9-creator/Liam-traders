@@ -144,9 +144,10 @@ liam_admin.register(Group, GroupAdmin)
 # Register app models
 from apps.users.admin import User as CustomUser, UserAdmin as CustomUserAdmin, Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 from apps.tasks.admin import Task, TaskApplication, TaskSubmission, TaskReview, Milestone
-from apps.surveys.admin import Survey, Question, SurveyResponse, SurveyPartner
+from apps.surveys.admin import Survey, Question, SurveyResponse, SurveyResponseAdmin, SurveyPartner
 from apps.courses.admin import Course, Lesson, Enrollment, LessonProgress, CourseReview, Assessment, AssessmentAttempt, InstructorProfile
 from apps.wallet.admin import Wallet, Transaction, WithdrawalRequest, Earning, BalanceHistory
+from apps.tasks.admin import TaskSubmissionAdmin
 from apps.payments.admin import MpesaPayment, PaymentMethod, TransactionLog
 
 liam_admin.register(CustomUser, CustomUserAdmin)
@@ -158,13 +159,13 @@ liam_admin.register(LevelUpgradePayment)
 
 liam_admin.register(Task)
 liam_admin.register(TaskApplication)
-liam_admin.register(TaskSubmission)
+liam_admin.register(TaskSubmission, TaskSubmissionAdmin)
 liam_admin.register(TaskReview)
 liam_admin.register(Milestone)
 
 liam_admin.register(Survey)
 liam_admin.register(Question)
-liam_admin.register(SurveyResponse)
+liam_admin.register(SurveyResponse, SurveyResponseAdmin)
 liam_admin.register(SurveyPartner)
 
 liam_admin.register(Course)

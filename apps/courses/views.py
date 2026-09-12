@@ -137,6 +137,18 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class EnrollmentListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_course(self):
+        course_id = self.request.data.get('course_id')
+        if not course_id:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'course_id': 'This field is required.'})
+
+        try:
+            return Course.objects.get(pk=course_id)
+        except Course.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound('Course not found.')
     
     def get_queryset(self):
         return Enrollment.objects.filter(student=self.request.user)
@@ -145,9 +157,15 @@ class EnrollmentListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return EnrollmentCreateSerializer
         return EnrollmentSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.request.method == 'POST':
+            context['course'] = self.get_course()
+        return context
     
     def perform_create(self, serializer):
-        course = self.context['course']
+        course = serializer.context['course']
         user = self.request.user
         
         # Calculate amount

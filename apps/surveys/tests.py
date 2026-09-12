@@ -1,6 +1,53 @@
 from datetime import timedelta
 
+from decimal import Decimal
+
 from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
+from rest_framework.test import APIClient
+
+from apps.surveys.models import Survey, SurveyResponse
+from apps.users.models import User
+from apps.wallet.models import Transaction, Wallet
+
+
+class SurveyRewardSettlementTests(TestCase):
+    def test_approving_response_credits_pending_wallet(self):
+        admin = User.objects.create_user(
+            email='survey-admin@example.com', password='StrongPass123!',
+            full_name='Survey Admin', is_staff=True,
+        )
+        worker = User.objects.create_user(
+            email='survey-worker@example.com', password='StrongPass123!',
+            full_name='Survey Worker',
+        )
+        survey = Survey.objects.create(
+            title='Reward Survey', description='Test survey', category='opinion',
+            status='active', estimated_time_minutes=5, max_participants=10,
+            reward_amount=Decimal('75.00'), start_date=timezone.now(),
+            end_date=timezone.now() + timedelta(days=1),
+        )
+        response = SurveyResponse.objects.create(
+            survey=survey, user=worker, answers={}, completion_time_seconds=60,
+            reward_amount=Decimal('75.00'),
+        )
+
+        client = APIClient()
+        client.force_authenticate(user=admin)
+        result = client.patch(
+            reverse('admin-review-response', kwargs={'pk': response.pk}),
+            {'status': 'approved', 'quality_score': '90.00'},
+            format='json',
+        )
+
+        self.assertEqual(result.status_code, 200, result.data)
+        wallet = Wallet.objects.get(user=worker)
+        self.assertEqual(wallet.pending_balance, Decimal('75.00'))
+        worker.refresh_from_db()
+        self.assertEqual(worker.pending_balance, Decimal('75.00'))
+        self.assertTrue(Transaction.objects.filter(user=worker, transaction_type='survey_reward').exists())
 from django.utils import timezone
 from rest_framework.test import APIClient
 

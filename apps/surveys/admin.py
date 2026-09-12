@@ -31,6 +31,27 @@ class SurveyResponseAdmin(admin.ModelAdmin):
     search_fields = ['user__email', 'survey__title']
     readonly_fields = ['submitted_at', 'reviewed_at']
 
+    def save_model(self, request, obj, form, change):
+        previous = SurveyResponse.objects.get(pk=obj.pk) if change else None
+        super().save_model(request, obj, form, change)
+
+        from apps.wallet.reward_services import approve_reward, mark_reward_paid
+        if obj.status == 'approved' and (not previous or previous.status != 'approved'):
+            approve_reward(
+                user=obj.user,
+                amount=obj.reward_amount,
+                source='survey',
+                description=f'Survey reward for {obj.survey.title}',
+                survey_response=obj,
+            )
+        if obj.is_paid and (not previous or not previous.is_paid):
+            mark_reward_paid(
+                user=obj.user,
+                amount=obj.reward_amount,
+                source='survey',
+                survey_response=obj,
+            )
+
 
 @admin.register(SurveyPartner)
 class SurveyPartnerAdmin(admin.ModelAdmin):

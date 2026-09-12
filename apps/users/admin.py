@@ -13,6 +13,20 @@ class UserAdmin(BaseUserAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
 
+        financial_fields = {
+            'total_earnings', 'available_balance', 'pending_balance'
+        }
+        if financial_fields.intersection(form.changed_data):
+            from apps.wallet.models import Wallet
+
+            wallet, _ = Wallet.objects.get_or_create(user=obj)
+            wallet.total_earnings = obj.total_earnings
+            wallet.available_balance = obj.available_balance
+            wallet.pending_balance = obj.pending_balance
+            wallet.save(update_fields=[
+                'total_earnings', 'available_balance', 'pending_balance', 'updated_at'
+            ])
+
         if not change:
             return
 

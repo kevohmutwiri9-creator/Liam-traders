@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -28,15 +30,18 @@ class Wallet(models.Model):
     
     def add_pending(self, amount):
         """Add amount to pending balance"""
-        self.pending_balance += amount
-        self.total_earnings += amount
+        amount = Decimal(str(amount))
+        self.pending_balance = Decimal(str(self.pending_balance)) + amount
+        self.total_earnings = Decimal(str(self.total_earnings)) + amount
         self.save()
     
     def approve_earnings(self, amount):
         """Move amount from pending to available"""
-        if self.pending_balance >= amount:
-            self.pending_balance -= amount
-            self.available_balance += amount
+        amount = Decimal(str(amount))
+        pending_balance = Decimal(str(self.pending_balance))
+        if pending_balance >= amount:
+            self.pending_balance = pending_balance - amount
+            self.available_balance = Decimal(str(self.available_balance)) + amount
             self.save()
             return True
         return False

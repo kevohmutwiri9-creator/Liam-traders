@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from apps.courses.models import Course
 from apps.tasks.models import Task
 from apps.admin_dashboard.views import LOG_STORAGE
+from apps.wallet.models import Wallet
 
 User = get_user_model()
 
@@ -72,3 +73,25 @@ class AdminDashboardApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.json()), 0)
         self.assertEqual(response.json()[0]['message'], 'admin event test')
+
+    def test_admin_earnings_update_syncs_user_and_wallet(self):
+        user = User.objects.create_user(
+            email='earning-user@example.com',
+            password='StrongPass123!',
+            full_name='Earning User',
+        )
+
+        response = self.client.patch(
+            f'/api/admin-dashboard/users/{user.pk}/',
+            {'total_earnings': '425.50'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        wallet = Wallet.objects.get(user=user)
+        self.assertEqual(user.total_earnings, 425.50)
+        self.assertEqual(user.available_balance, 425.50)
+        self.assertEqual(wallet.total_earnings, 425.50)
+        self.assertEqual(wallet.available_balance, 425.50)
+        self.assertTrue(user.notifications.filter(title='Earnings Updated').exists())

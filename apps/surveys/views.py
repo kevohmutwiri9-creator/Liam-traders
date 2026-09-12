@@ -150,24 +150,32 @@ class AdminSurveyResponseReviewView(generics.UpdateAPIView):
     
     def perform_update(self, serializer):
         from django.utils import timezone
+        response = self.get_object()
+        was_approved = response.status == 'approved'
         serializer.save(
             reviewed_by=self.request.user,
             reviewed_at=timezone.now()
         )
         
         # If approved, update user's pending balance
-        if serializer.validated_data.get('status') == 'approved':
-            response = self.get_object()
+        if serializer.validated_data.get('status') == 'approved' and not was_approved:
             user = response.user
-            user.pending_balance += response.reward_amount
             user.total_tasks_completed += 1
             
             # Update quality score (simplified calculation)
             current_quality = user.quality_score or 0
             new_quality = response.quality_score or 85
             user.quality_score = (current_quality + new_quality) / 2
-            
             user.save()
+
+            from apps.wallet.reward_services import approve_reward
+            approve_reward(
+                user=user,
+                amount=response.reward_amount,
+                source='survey',
+                description=f'Survey reward for {response.survey.title}',
+                survey_response=response,
+            )
 
 
 class SurveyPartnerListCreateView(generics.ListCreateAPIView):

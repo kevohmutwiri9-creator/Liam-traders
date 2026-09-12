@@ -206,10 +206,15 @@ def update_user(request, user_id):
     
     if 'total_earnings' in request.data:
         from apps.wallet.models import Wallet
+        from decimal import Decimal
+
+        total_earnings = Decimal(str(request.data['total_earnings']))
         wallet, created = Wallet.objects.get_or_create(user=user)
-        wallet.total_earnings = request.data['total_earnings']
-        wallet.available_balance = request.data['total_earnings']
+        wallet.total_earnings = total_earnings
+        wallet.available_balance = total_earnings
         wallet.save()
+        user.total_earnings = total_earnings
+        user.available_balance = total_earnings
         
         # Send notification to user
         from apps.users.models import Notification

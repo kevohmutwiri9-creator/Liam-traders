@@ -205,6 +205,7 @@ class TaskSubmissionDetailView(generics.RetrieveUpdateAPIView):
         from django.utils import timezone
         submission = self.get_object()
         task = submission.task
+        was_approved = submission.status == 'approved'
         
         # Check if user is the client
         if task.client != self.request.user:
@@ -216,17 +217,24 @@ class TaskSubmissionDetailView(generics.RetrieveUpdateAPIView):
         )
         
         # If approved, update worker's pending balance
-        if serializer.validated_data.get('status') == 'approved':
+        if serializer.validated_data.get('status') == 'approved' and not was_approved:
             worker = submission.worker
-            worker.pending_balance += submission.amount_earned
             worker.total_tasks_completed += 1
             
             # Update quality score
             current_quality = worker.quality_score or 0
             new_quality = submission.quality_score or 85
             worker.quality_score = (current_quality + new_quality) / 2
-            
             worker.save()
+
+            from apps.wallet.reward_services import approve_reward
+            approve_reward(
+                user=worker,
+                amount=submission.amount_earned,
+                source='task',
+                description=f'Task reward for {submission.task.title}',
+                task_submission=submission,
+            )
             
             # Update task status
             task.status = 'completed'

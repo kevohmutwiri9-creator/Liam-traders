@@ -31,6 +31,27 @@ class TaskSubmissionAdmin(admin.ModelAdmin):
     search_fields = ['task__title', 'worker__email']
     readonly_fields = ['submitted_at', 'reviewed_at']
 
+    def save_model(self, request, obj, form, change):
+        previous = TaskSubmission.objects.get(pk=obj.pk) if change else None
+        super().save_model(request, obj, form, change)
+
+        from apps.wallet.reward_services import approve_reward, mark_reward_paid
+        if obj.status == 'approved' and (not previous or previous.status != 'approved'):
+            approve_reward(
+                user=obj.worker,
+                amount=obj.amount_earned,
+                source='task',
+                description=f'Task reward for {obj.task.title}',
+                task_submission=obj,
+            )
+        if obj.is_paid and (not previous or not previous.is_paid):
+            mark_reward_paid(
+                user=obj.worker,
+                amount=obj.amount_earned,
+                source='task',
+                task_submission=obj,
+            )
+
 
 @admin.register(TaskReview)
 class TaskReviewAdmin(admin.ModelAdmin):
