@@ -131,6 +131,30 @@ class PaymentApprovalFlowTests(TestCase):
         self.assertTrue(user.is_activated)
         self.assertEqual(user.level, 1)
 
+    def test_legacy_level_one_activation_is_detected(self):
+        admin = User.objects.create_user(
+            email='legacy-admin@example.com',
+            password='StrongPass123!',
+            full_name='Legacy Admin',
+            is_staff=True,
+        )
+        user = User.objects.create_user(
+            email='legacy-user@example.com',
+            password='StrongPass123!',
+            full_name='Legacy User',
+        )
+        payment = LevelUpgradePayment.objects.create(
+            user=user,
+            target_level=1,
+            amount=Decimal('200.00'),
+            transaction_reference='TX-LEGACY-ACTIVATE-001',
+        )
+
+        self.assertTrue(payment.is_activation_payment)
+        self.assertTrue(payment.approve(admin))
+        user.refresh_from_db()
+        self.assertTrue(user.is_activated)
+
     def test_admin_approval_creates_notification_and_updates_level(self):
         admin = User.objects.create_user(
             email='admin@example.com',

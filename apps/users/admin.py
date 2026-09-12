@@ -102,3 +102,15 @@ class LevelUpgradePaymentAdmin(admin.ModelAdmin):
         (None, {'fields': ('user', 'payment_type', 'target_level', 'amount', 'transaction_reference', 'status')}),
         ('Admin review', {'fields': ('admin_notes', 'processed_by', 'processed_at')}),
     )
+
+    def save_model(self, request, obj, form, change):
+        previous = LevelUpgradePayment.objects.get(pk=obj.pk) if change else None
+        if change and previous.status == 'pending' and obj.status == 'approved':
+            obj.status = 'pending'
+            obj.approve(request.user)
+            return
+        if change and previous.status == 'pending' and obj.status == 'rejected':
+            obj.status = 'pending'
+            obj.reject(request.user, obj.admin_notes or '')
+            return
+        super().save_model(request, obj, form, change)

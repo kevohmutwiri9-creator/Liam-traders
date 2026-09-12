@@ -267,6 +267,15 @@ class LevelUpgradePayment(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.payment_type} - {self.transaction_reference}"
+
+    @property
+    def is_activation_payment(self):
+        from django.conf import settings
+
+        return self.payment_type == 'activation' or (
+            self.target_level == 1 and
+            self.amount == settings.ACTIVATION_FEE
+        )
     
     def approve(self, admin_user):
         """Approve payment and upgrade user level"""
@@ -278,7 +287,7 @@ class LevelUpgradePayment(models.Model):
         self.processed_by = admin_user
         self.save()
         
-        if self.payment_type == 'activation':
+        if self.is_activation_payment:
             self.user.is_activated = True
             self.user.save(update_fields=['is_activated', 'updated_at'])
             title = 'Activation Approved'
