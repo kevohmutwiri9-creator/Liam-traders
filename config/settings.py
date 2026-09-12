@@ -13,7 +13,7 @@ if len(SECRET_KEY) < 32:
     print(f"WARNING: SECRET_KEY is too short ({len(SECRET_KEY)} chars). Padding to 32 chars.")
     SECRET_KEY = SECRET_KEY.ljust(32, 'x')
 
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,liam-traders.onrender.com', cast=lambda v: [s.strip() for s in v.split(',')])
 
