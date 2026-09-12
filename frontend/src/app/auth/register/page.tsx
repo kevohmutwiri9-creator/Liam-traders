@@ -39,6 +39,7 @@ export default function RegisterPage() {
       });
       
       // Sign in first, then continue directly to activation.
+      localStorage.setItem("activation_required", "true");
       router.push("/auth/login?registered=true&next=%2Fdashboard%2Fupgrade");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Registration failed. Please try again.");

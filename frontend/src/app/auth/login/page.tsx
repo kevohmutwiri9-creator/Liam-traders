@@ -40,7 +40,16 @@ export default function LoginPage() {
       const nextPath = typeof window !== "undefined"
         ? new URLSearchParams(window.location.search).get("next")
         : null;
-      const destination = nextPath && nextPath.startsWith("/") ? nextPath : "/dashboard";
+      const registered = typeof window !== "undefined"
+        && new URLSearchParams(window.location.search).get("registered") === "true";
+      const activationRequired = typeof window !== "undefined"
+        && localStorage.getItem("activation_required") === "true";
+      const destination = nextPath && nextPath.startsWith("/")
+        ? nextPath
+        : registered || activationRequired
+          ? "/dashboard/upgrade"
+          : "/dashboard";
+      localStorage.removeItem("activation_required");
       router.push(destination);
     } catch (err: any) {
       setError(err.response?.data?.detail || "Login failed. Please try again.");
