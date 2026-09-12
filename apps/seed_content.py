@@ -236,18 +236,21 @@ def ensure_generated_content():
 
     generated = {'courses': 0, 'surveys': 0, 'tasks': 0}
 
-    if not Course.objects.exists():
-        for template in CourseTemplate.objects.filter(auto_generate=True):
+    for template in CourseTemplate.objects.filter(auto_generate=True):
+        title_prefix = f'{template.name} -'
+        if not Course.objects.filter(title__startswith=title_prefix).exists():
             if template.generate_course():
                 generated['courses'] += 1
 
-    if not Survey.objects.exists():
-        for template in SurveyTemplate.objects.filter(auto_generate=True):
+    for template in SurveyTemplate.objects.filter(auto_generate=True):
+        title_prefix = f'{template.name} -'
+        if not Survey.objects.filter(title__startswith=title_prefix).exists():
             if template.generate_survey():
                 generated['surveys'] += 1
 
-    if not Task.objects.exists():
-        for template in TaskTemplate.objects.filter(auto_generate=True):
+    for template in TaskTemplate.objects.filter(auto_generate=True):
+        title_prefix = f'{template.name} -'
+        if not Task.objects.filter(title__startswith=title_prefix).exists():
             if template.generate_task():
                 generated['tasks'] += 1
 

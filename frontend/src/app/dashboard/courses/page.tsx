@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { formatCurrency } from "@/lib/utils";
 import { coursesAPI } from "@/lib/api";
 
 export default function CoursesPage() {
+  const router = useRouter();
   const [courses, setCourses] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -55,8 +57,8 @@ export default function CoursesPage() {
 
       {courses?.results && courses.results.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.results.map((course: any) => (
-            <Card key={course.id} className="hover:shadow-lg transition-shadow">
+          {courses.results.map((course: any, index: number) => (
+            <Card key={course.id} className="motion-rise hover:shadow-lg transition-shadow" style={{ animationDelay: `${index * 70}ms` }}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <Badge className={getDifficultyColor(course.difficulty)}>{course.difficulty}</Badge>
@@ -95,7 +97,7 @@ export default function CoursesPage() {
                       <span className="text-yellow-600">⭐ {course.average_rating.toFixed(1)}</span>
                     </div>
                   )}
-                  <Button className="w-full mt-4">
+                  <Button className="w-full mt-4" onClick={() => router.push(`/dashboard/courses/${course.id}`)}>
                     {course.is_free ? 'Enroll Now' : 'View Course'}
                   </Button>
                 </div>

@@ -58,8 +58,8 @@ export default function TasksPage() {
 
       {tasks?.results && tasks.results.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tasks.results.map((task: any) => (
-            <Card key={task.id} className="hover:shadow-lg transition-shadow">
+          {tasks.results.map((task: any, index: number) => (
+            <Card key={task.id} className="motion-rise hover:shadow-lg transition-shadow" style={{ animationDelay: `${index * 70}ms` }}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <Badge className={getPriorityColor(task.priority)}>{task.priority}</Badge>
