@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/store";
 import { userAPI } from "@/lib/api";
@@ -12,17 +12,26 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isInitialized = useAuthStore((state) => state.isInitialized);
   const user = useAuthStore((state) => state.user);
   const refreshUser = useAuthStore((state) => state.refreshUser);
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activationChecked, setActivationChecked] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshUser();
-    }
+    let active = true;
+    if (!isAuthenticated) return undefined;
+
+    refreshUser().finally(() => {
+      if (active) setActivationChecked(true);
+    });
+
+    return () => {
+      active = false;
+    };
   }, [isAuthenticated, refreshUser]);
 
   useEffect(() => {
@@ -51,9 +60,21 @@ export default function DashboardLayout({
     }
   }, [isAuthenticated]);
 
-  if (!isInitialized || !isAuthenticated) {
+  useEffect(() => {
+    if (!activationChecked || !isAuthenticated || !user || user.is_staff || user.is_activated) {
+      return;
+    }
+
+    if (pathname !== "/dashboard/activation") {
+      router.replace("/dashboard/activation");
+    }
+  }, [activationChecked, isAuthenticated, pathname, router, user]);
+
+  if (!isInitialized || !isAuthenticated || !activationChecked) {
     return null;
   }
+
+  const activationRequired = Boolean(user && !user.is_staff && !user.is_activated);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -61,7 +82,7 @@ export default function DashboardLayout({
       <header className="bg-white border-b sticky top-0 z-20">
         <div className="container">
           <div className="flex items-center justify-between h-16">
-            <Link href="/dashboard" className="flex items-center gap-2 min-w-0">
+            <Link href={activationRequired ? "/dashboard/activation" : "/dashboard"} className="flex items-center gap-2 min-w-0">
               <img src="/logo.png" alt="Liam Traders" className="w-8 h-8 shrink-0" />
               <span className="text-lg font-bold text-primary-600 truncate sm:text-xl">Liam Traders</span>
             </Link>
@@ -76,6 +97,12 @@ export default function DashboardLayout({
             </button>
 
             <nav className={`${mobileMenuOpen ? 'flex' : 'hidden'} absolute left-4 right-4 top-16 z-30 flex-col gap-2 rounded-lg border bg-white p-4 shadow-lg md:static md:flex md:flex-row md:items-center md:gap-6 md:p-0 md:shadow-none md:border-0`}>
+              {activationRequired ? (
+                <span className="rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+                  Activation required
+                </span>
+              ) : null}
+              {!activationRequired && <>
               <Link href="/dashboard" className="text-gray-600 hover:text-gray-900" onClick={() => setMobileMenuOpen(false)}>
                 Dashboard
               </Link>
@@ -118,6 +145,7 @@ export default function DashboardLayout({
                   </Link>
                 </>
               )}
+              </>}
               <button
                 onClick={() => {
                   useAuthStore.getState().logout();
