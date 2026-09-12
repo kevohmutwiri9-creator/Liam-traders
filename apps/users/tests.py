@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.test import TestCase
+from django.urls import reverse
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from apps.courses.models import CourseTemplate
@@ -115,3 +116,33 @@ class PaymentApprovalFlowTests(TestCase):
         self.assertEqual(payment.status, 'approved')
         self.assertEqual(user.level, 2)
         self.assertTrue(user.notifications.filter(title='Level Upgrade Approved').exists())
+
+    def test_admin_user_update_creates_notification(self):
+        admin = User.objects.create_user(
+            email='admin-update@example.com',
+            password='StrongPass123!',
+            full_name='Admin User',
+            is_staff=True,
+        )
+        user = User.objects.create_user(
+            email='updated-user@example.com',
+            password='StrongPass123!',
+            full_name='Updated User',
+        )
+
+        response = self.client.patch(
+            reverse('update-user', kwargs={'user_id': user.pk}),
+            {'level': 2},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 401)
+
+        self.client.force_login(admin)
+        response = self.client.patch(
+            reverse('update-user', kwargs={'user_id': user.pk}),
+            {'level': 2},
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(user.notifications.filter(type='level', title='Level Updated').exists())

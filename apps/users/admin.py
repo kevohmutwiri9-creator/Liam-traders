@@ -10,6 +10,29 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ['email', 'full_name', 'phone_number']
     ordering = ['-created_at']
     
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        if not change:
+            return
+
+        changed_fields = [
+            field for field in form.changed_data
+            if field not in {'updated_at'}
+        ]
+        if changed_fields:
+            Notification.objects.create(
+                user=obj,
+                type='system',
+                title='Account Updated',
+                message=(
+                    f'An administrator updated your account: '
+                    f'{", ".join(changed_fields)}.'
+                ),
+                notification_type='admin_update',
+                action_url='/dashboard/settings',
+            )
+
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Profile Information', {
             'fields': ('full_name', 'phone_number', 'profile_picture', 'bio', 'location')

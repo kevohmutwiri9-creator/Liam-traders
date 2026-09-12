@@ -194,6 +194,7 @@ def update_user(request, user_id):
         from apps.users.models import Notification
         Notification.objects.create(
             user=user,
+            type='level',
             title='Level Updated',
             message=f'Your level has been updated to Level {user.level}',
             notification_type='level_upgrade',
@@ -214,6 +215,7 @@ def update_user(request, user_id):
         from apps.users.models import Notification
         Notification.objects.create(
             user=user,
+            type='system',
             title='Earnings Updated',
             message=f'Your earnings have been updated to ${request.data["total_earnings"]}',
             notification_type='account',
@@ -241,6 +243,7 @@ def ban_user(request, user_id):
     from apps.users.models import Notification
     Notification.objects.create(
         user=user,
+        type='system',
         title='Account Banned',
         message='Your account has been banned. Please contact support for more information.',
         notification_type='account',
@@ -266,6 +269,7 @@ def unban_user(request, user_id):
     from apps.users.models import Notification
     Notification.objects.create(
         user=user,
+        type='system',
         title='Account Reactivated',
         message='Your account has been reactivated. You can now access your account.',
         notification_type='account',
