@@ -47,7 +47,7 @@ export default function LoginPage() {
       const destination = nextPath && nextPath.startsWith("/")
         ? nextPath
         : registered || activationRequired
-          ? "/dashboard/upgrade"
+          ? "/dashboard/activation"
           : "/dashboard";
       localStorage.removeItem("activation_required");
       router.push(destination);

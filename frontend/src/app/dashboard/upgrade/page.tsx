@@ -50,6 +50,11 @@ export default function LevelUpgradePage() {
       ]);
       setUser(profileRes.data);
       setMyPayments(getCollectionResults(paymentsRes.data));
+
+      if (!profileRes.data.is_activated) {
+        router.replace("/dashboard/activation");
+        return;
+      }
       
       // Set default to next level
       const nextLevel = profileRes.data.level + 1;

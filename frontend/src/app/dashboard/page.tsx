@@ -224,9 +224,9 @@ export default function DashboardPage() {
               <h3 className="font-semibold">Learn Skills</h3>
               <p className="text-sm text-gray-600">Improve your skills to earn more</p>
             </a>
-            <a href="/dashboard/upgrade" className="p-4 border rounded-lg hover:bg-gray-50 transition">
-              <h3 className="font-semibold">Upgrade Level</h3>
-              <p className="text-sm text-gray-600">Pay to unlock higher levels</p>
+            <a href={user?.is_activated ? "/dashboard/upgrade" : "/dashboard/activation"} className="p-4 border rounded-lg hover:bg-gray-50 transition">
+              <h3 className="font-semibold">{user?.is_activated ? "Upgrade Level" : "Activate Account"}</h3>
+              <p className="text-sm text-gray-600">{user?.is_activated ? "Pay to unlock higher levels" : "Complete your KES 200 activation"}</p>
             </a>
           </div>
         </CardContent>
