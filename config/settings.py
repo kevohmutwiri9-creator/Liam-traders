@@ -15,6 +15,11 @@ if len(SECRET_KEY) < 32:
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
+# Never expose Django debug pages on the Render deployment, even if an old
+# environment variable still sets DEBUG=True.
+if 'onrender.com' in os.getenv('ALLOWED_HOSTS', 'liam-traders.onrender.com'):
+    DEBUG = False
+
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,liam-traders.onrender.com', cast=lambda v: [s.strip() for s in v.split(',')])
 
 INSTALLED_APPS = [
