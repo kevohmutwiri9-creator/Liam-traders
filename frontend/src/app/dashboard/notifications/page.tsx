@@ -23,6 +23,8 @@ export default function NotificationsPage() {
     };
 
     fetchNotifications();
+    const interval = setInterval(fetchNotifications, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const markAsRead = async (id: number) => {

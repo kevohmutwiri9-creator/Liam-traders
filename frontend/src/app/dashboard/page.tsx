@@ -6,8 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatCurrency, getLevelName, getLevelColor } from "@/lib/utils";
+import { formatCurrency, getLevelName } from "@/lib/utils";
 import { userAPI, walletAPI } from "@/lib/api";
+
+const LEVEL_BADGE_COLORS: Record<number, string> = {
+  1: "!bg-gray-600 !text-white",
+  2: "!bg-blue-600 !text-white",
+  3: "!bg-green-600 !text-white",
+  4: "!bg-purple-600 !text-white",
+  5: "!bg-yellow-600 !text-white",
+};
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -33,6 +41,8 @@ export default function DashboardPage() {
     };
 
     fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, [updateUser]);
 
   if (loading) {
@@ -53,7 +63,7 @@ export default function DashboardPage() {
             <div>
               <h3 className="text-lg font-semibold">Current Level</h3>
               <div className="flex items-center gap-3 mt-2">
-                <Badge className={`${getLevelColor(user?.level || 1)} text-white px-4 py-2`}>
+                <Badge className={`${LEVEL_BADGE_COLORS[user?.level || 1] || LEVEL_BADGE_COLORS[1]} px-4 py-2`}>
                   Level {user?.level} - {getLevelName(user?.level || 1)}
                 </Badge>
               </div>

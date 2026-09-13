@@ -216,7 +216,10 @@ class PaymentApprovalFlowTests(TestCase):
 
         self.assertEqual(payment.status, 'approved')
         self.assertEqual(user.level, 2)
-        self.assertTrue(user.notifications.filter(title='Level Upgrade Approved').exists())
+        self.assertEqual(
+            user.notifications.filter(title='Level Upgrade Approved').count(),
+            1,
+        )
 
     def test_admin_user_update_creates_notification(self):
         admin = User.objects.create_user(
