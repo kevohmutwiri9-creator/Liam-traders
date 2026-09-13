@@ -38,6 +38,8 @@ export default function ActivationPage() {
 
   useEffect(() => {
     load();
+    const interval = setInterval(load, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const submit = async (event: FormEvent) => {

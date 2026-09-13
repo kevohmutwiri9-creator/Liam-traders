@@ -2,6 +2,7 @@ from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from django.db import models
 from .models import Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 from .serializers import (
     UserSerializer, UserUpdateSerializer, SkillSerializer,
@@ -19,9 +20,23 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     
     def get_object(self):
         # Ensure user has a referral code
-        if not self.request.user.referral_code:
-            self.request.user.generate_referral_code()
-        return self.request.user
+        user = self.request.user
+        if not user.referral_code:
+            user.generate_referral_code()
+
+        # Repair activation state for payments approved before the activation
+        # field was introduced or approved through the old admin flow.
+        if not user.is_activated and LevelUpgradePayment.objects.filter(
+            user=user,
+            status='approved',
+        ).filter(
+            models.Q(payment_type='activation') |
+            models.Q(target_level=1, amount=200)
+        ).exists():
+            user.is_activated = True
+            user.save(update_fields=['is_activated', 'updated_at'])
+
+        return user
     
     def get_serializer_class(self):
         if self.request.method == 'PUT' or self.request.method == 'PATCH':

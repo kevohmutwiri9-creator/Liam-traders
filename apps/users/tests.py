@@ -11,7 +11,7 @@ from apps.surveys.models import QuestionBank, SurveyTemplate
 from apps.tasks.models import TaskTemplate
 from apps.users.models import LevelUpgradePayment, User
 from apps.users.serializers import LevelUpgradePaymentSerializer, UserCreateSerializer
-from apps.users.views import PaymentApprovalView
+from apps.users.views import PaymentApprovalView, UserProfileView
 
 
 class UserCreateSerializerTests(TestCase):
@@ -152,6 +152,29 @@ class PaymentApprovalFlowTests(TestCase):
 
         self.assertTrue(payment.is_activation_payment)
         self.assertTrue(payment.approve(admin))
+        user.refresh_from_db()
+        self.assertTrue(user.is_activated)
+
+    def test_profile_repairs_approved_legacy_activation(self):
+        user = User.objects.create_user(
+            email='profile-repair@example.com',
+            password='StrongPass123!',
+            full_name='Profile Repair User',
+        )
+        LevelUpgradePayment.objects.create(
+            user=user,
+            target_level=1,
+            amount=Decimal('200.00'),
+            transaction_reference='TX-PROFILE-REPAIR-001',
+            status='approved',
+        )
+
+        factory = APIRequestFactory()
+        request = factory.get('/api/users/profile/')
+        force_authenticate(request, user=user)
+        response = UserProfileView.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
         user.refresh_from_db()
         self.assertTrue(user.is_activated)
 
