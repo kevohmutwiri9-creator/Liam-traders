@@ -19,18 +19,26 @@ export default function CourseDetailPage() {
   const [lessons, setLessons] = useState<any[]>([]);
   const [enrollment, setEnrollment] = useState<any>(null);
   const [completingLesson, setCompletingLesson] = useState<number | null>(null);
+  const [notes, setNotes] = useState<Record<number, string>>({});
+  const [savingNote, setSavingNote] = useState<number | null>(null);
 
   const loadCourse = async () => {
     try {
-      const [courseResponse, lessonsResponse, enrollmentsResponse] = await Promise.all([
+      const [courseResponse, lessonsResponse, enrollmentsResponse, notesResponse] = await Promise.all([
         coursesAPI.getCourse(courseId),
         coursesAPI.getCourseLessons(courseId),
         coursesAPI.getMyEnrollments(),
+        coursesAPI.getLessonNotes(courseId),
       ]);
       setCourse(courseResponse.data);
       setLessons(getCollectionResults(lessonsResponse.data));
       const enrollments = getCollectionResults(enrollmentsResponse.data);
       setEnrollment(enrollments.find((item: any) => item.course === courseId) || null);
+      const noteMap: Record<number, string> = {};
+      getCollectionResults(notesResponse.data).forEach((note: any) => {
+        noteMap[note.lesson] = note.content;
+      });
+      setNotes(noteMap);
     } catch (error) {
       router.push("/dashboard/courses");
     } finally {
@@ -80,6 +88,19 @@ export default function CourseDetailPage() {
     }
   };
 
+  const saveNote = async (lessonId: number) => {
+    if (!notes[lessonId]?.trim()) return;
+    setSavingNote(lessonId);
+    try {
+      await coursesAPI.saveLessonNote(lessonId, notes[lessonId]);
+      setMessage("Note saved to your course library.");
+    } catch (error: any) {
+      setMessage(error.response?.data?.detail || "Unable to save note.");
+    } finally {
+      setSavingNote(null);
+    }
+  };
+
   if (loading) return <div className="container py-8">Loading course...</div>;
   if (!course) return null;
 
@@ -123,11 +144,24 @@ export default function CourseDetailPage() {
                 {lessons.map((lesson) => {
                   const completed = enrollment.lessons_completed?.includes(lesson.id);
                   return (
-                    <div key={lesson.id} className="flex items-center justify-between rounded-xl border p-4">
-                      <div><p className="font-medium">{lesson.title}</p><p className="text-sm text-gray-500">{lesson.lesson_type}</p></div>
-                      <Button variant={completed ? "outline" : "default"} disabled={completed || completingLesson === lesson.id} onClick={() => completeLesson(lesson.id)}>
-                        {completed ? "Completed" : completingLesson === lesson.id ? "Saving..." : "Complete lesson"}
+                    <div key={lesson.id} className="space-y-3">
+                      <div className="flex items-center justify-between rounded-xl border p-4">
+                        <div className="min-w-0 flex-1"><p className="font-medium">{lesson.title}</p><p className="text-sm text-gray-500">{lesson.lesson_type}</p></div>
+                        <Button variant={completed ? "outline" : "default"} disabled={completed || completingLesson === lesson.id} onClick={() => completeLesson(lesson.id)}>
+                          {completed ? "Completed" : completingLesson === lesson.id ? "Saving..." : "Complete lesson"}
+                        </Button>
+                      </div>
+                      <div className="rounded-xl bg-amber-50 p-4">
+                      <textarea
+                        value={notes[lesson.id] || ""}
+                        onChange={(event) => setNotes({ ...notes, [lesson.id]: event.target.value })}
+                        placeholder="Write a note for this lesson..."
+                        className="min-h-20 w-full resize-y rounded-lg border border-amber-200 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-amber-400"
+                      />
+                      <Button variant="outline" className="mt-2" disabled={savingNote === lesson.id || !notes[lesson.id]?.trim()} onClick={() => saveNote(lesson.id)}>
+                        {savingNote === lesson.id ? "Saving note..." : "Save note"}
                       </Button>
+                      </div>
                     </div>
                   );
                 })}

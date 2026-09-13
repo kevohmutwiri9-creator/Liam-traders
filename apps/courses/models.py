@@ -117,6 +117,21 @@ class Lesson(models.Model):
         return f"{self.course.title} - {self.title}"
 
 
+class LessonNote(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='lesson_notes')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='notes')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        unique_together = ['user', 'lesson']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.lesson.title} note"
+
+
 class Enrollment(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),

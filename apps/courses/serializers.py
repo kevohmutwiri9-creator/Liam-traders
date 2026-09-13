@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (
-    Course, Lesson, Enrollment, LessonProgress, CourseReview,
+    Course, Lesson, LessonNote, Enrollment, LessonProgress, CourseReview,
     Assessment, AssessmentAttempt, InstructorProfile
 )
 
@@ -10,6 +10,23 @@ class LessonSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = '__all__'
         read_only_fields = ['course', 'created_at', 'updated_at']
+
+
+class LessonNoteSerializer(serializers.ModelSerializer):
+    lesson_title = serializers.CharField(source='lesson.title', read_only=True)
+
+    class Meta:
+        model = LessonNote
+        fields = '__all__'
+        read_only_fields = ['user', 'lesson', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        note, _ = LessonNote.objects.update_or_create(
+            user=validated_data['user'],
+            lesson=validated_data['lesson'],
+            defaults={'content': validated_data['content']},
+        )
+        return note
 
 
 class CourseSerializer(serializers.ModelSerializer):

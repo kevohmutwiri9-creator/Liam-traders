@@ -4,11 +4,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.db.models import Q, Avg, Count
 from .models import (
-    Course, Lesson, Enrollment, LessonProgress, CourseReview,
+    Course, Lesson, LessonNote, Enrollment, LessonProgress, CourseReview,
     Assessment, AssessmentAttempt, InstructorProfile
 )
 from .serializers import (
-    CourseSerializer, CourseCreateSerializer, LessonSerializer,
+    CourseSerializer, CourseCreateSerializer, LessonSerializer, LessonNoteSerializer,
     EnrollmentSerializer, EnrollmentCreateSerializer, LessonProgressSerializer,
     LessonProgressUpdateSerializer, CourseReviewSerializer,
     AssessmentSerializer, AssessmentAttemptSerializer, InstructorProfileSerializer
@@ -133,6 +133,25 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
         if lesson.course.instructor != self.request.user:
             raise permissions.PermissionDenied("You can only edit your own lessons")
         serializer.save()
+
+
+class LessonNoteListCreateView(generics.ListCreateAPIView):
+    serializer_class = LessonNoteSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = LessonNote.objects.filter(user=self.request.user)
+        lesson_id = self.request.query_params.get('lesson_id')
+        course_id = self.request.query_params.get('course_id')
+        if lesson_id:
+            queryset = queryset.filter(lesson_id=lesson_id)
+        if course_id:
+            queryset = queryset.filter(lesson__course_id=course_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        lesson = Lesson.objects.get(id=self.request.data.get('lesson_id'))
+        serializer.save(user=self.request.user, lesson=lesson)
 
 
 class EnrollmentListCreateView(generics.ListCreateAPIView):

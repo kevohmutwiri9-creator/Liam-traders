@@ -145,7 +145,7 @@ liam_admin.register(Group, GroupAdmin)
 from apps.users.admin import User as CustomUser, UserAdmin as CustomUserAdmin, Skill, Education, WorkExperience, Notification, LevelUpgradePayment
 from apps.tasks.admin import Task, TaskApplication, TaskSubmission, TaskReview, Milestone
 from apps.surveys.admin import Survey, Question, SurveyResponse, SurveyResponseAdmin, SurveyPartner
-from apps.courses.admin import Course, Lesson, Enrollment, LessonProgress, CourseReview, Assessment, AssessmentAttempt, InstructorProfile
+from apps.courses.admin import Course, Lesson, LessonNote, LessonNoteAdmin, Enrollment, LessonProgress, CourseReview, Assessment, AssessmentAttempt, InstructorProfile
 from apps.wallet.admin import Wallet, Transaction, WithdrawalRequest, Earning, BalanceHistory
 from apps.tasks.admin import TaskSubmissionAdmin
 from apps.payments.admin import MpesaPayment, PaymentMethod, TransactionLog
@@ -170,6 +170,7 @@ liam_admin.register(SurveyPartner)
 
 liam_admin.register(Course)
 liam_admin.register(Lesson)
+liam_admin.register(LessonNote, LessonNoteAdmin)
 liam_admin.register(Enrollment)
 liam_admin.register(LessonProgress)
 liam_admin.register(CourseReview)

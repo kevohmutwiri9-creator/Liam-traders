@@ -212,6 +212,10 @@ export const coursesAPI = {
     api.get('/courses/enrollments/'),
   getCourseLessons: (courseId: number) =>
     api.get(`/courses/${courseId}/lessons/`),
+  getLessonNotes: (courseId: number) =>
+    api.get('/courses/notes/', { params: { course_id: courseId } }),
+  saveLessonNote: (lessonId: number, content: string) =>
+    api.post('/courses/notes/', { lesson_id: lessonId, content }),
   updateProgress: (enrollmentId: number, data: any) =>
     api.post(`/courses/enrollments/${enrollmentId}/progress/`, data),
   getCourseReviews: (courseId: number) =>

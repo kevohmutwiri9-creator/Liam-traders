@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Course, Lesson, Enrollment, LessonProgress, CourseReview,
+    Course, Lesson, LessonNote, Enrollment, LessonProgress, CourseReview,
     Assessment, AssessmentAttempt, InstructorProfile
 )
 
@@ -25,6 +25,13 @@ class LessonAdmin(admin.ModelAdmin):
     list_display = ['course', 'title', 'lesson_type', 'order', 'video_duration_seconds']
     list_filter = ['lesson_type']
     search_fields = ['title', 'course__title']
+
+
+@admin.register(LessonNote)
+class LessonNoteAdmin(admin.ModelAdmin):
+    list_display = ['user', 'lesson', 'updated_at']
+    search_fields = ['user__email', 'lesson__title', 'content']
+    readonly_fields = ['created_at', 'updated_at']
 
 
 @admin.register(Enrollment)
