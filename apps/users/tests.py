@@ -178,6 +178,35 @@ class PaymentApprovalFlowTests(TestCase):
         user.refresh_from_db()
         self.assertTrue(user.is_activated)
 
+    def test_profile_syncs_approved_upgrade_level_and_notification(self):
+        user = User.objects.create_user(
+            email='upgrade-repair@example.com',
+            password='StrongPass123!',
+            full_name='Upgrade Repair User',
+            level=1,
+        )
+        LevelUpgradePayment.objects.create(
+            user=user,
+            payment_type='upgrade',
+            target_level=2,
+            amount=Decimal('500.00'),
+            transaction_reference='TX-UPGRADE-REPAIR-001',
+            status='approved',
+        )
+
+        factory = APIRequestFactory()
+        request = factory.get('/api/users/profile/')
+        force_authenticate(request, user=user)
+        response = UserProfileView.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        self.assertEqual(user.level, 2)
+        self.assertEqual(
+            user.notifications.filter(title='Level Upgrade Approved').count(),
+            1,
+        )
+
     def test_admin_approval_creates_notification_and_updates_level(self):
         admin = User.objects.create_user(
             email='admin@example.com',

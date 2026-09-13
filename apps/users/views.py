@@ -36,6 +36,38 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             user.is_activated = True
             user.save(update_fields=['is_activated', 'updated_at'])
 
+        approved_upgrades = LevelUpgradePayment.objects.filter(
+            user=user,
+            status='approved',
+        ).exclude(
+            models.Q(payment_type='activation') |
+            models.Q(target_level=1, amount=200)
+        )
+        highest_approved_level = approved_upgrades.aggregate(
+            highest=models.Max('target_level')
+        )['highest']
+        if highest_approved_level and user.level < highest_approved_level:
+            user.level = highest_approved_level
+            user.save(update_fields=['level', 'updated_at'])
+
+        for payment in approved_upgrades:
+            title = 'Level Upgrade Approved'
+            if not user.notifications.filter(
+                title=title,
+                message__icontains=f'Level {payment.target_level}',
+            ).exists():
+                Notification.objects.create(
+                    user=user,
+                    type='level',
+                    title=title,
+                    message=(
+                        f'Your payment for Level {payment.target_level} has been approved. '
+                        'Your level has been updated.'
+                    ),
+                    notification_type='level_upgrade',
+                    action_url='/dashboard',
+                )
+
         return user
     
     def get_serializer_class(self):
