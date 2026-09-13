@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { coursesAPI } from "@/lib/api";
+import { coursesAPI, getCollectionResults } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 
 export default function CourseDetailPage() {
@@ -16,12 +16,30 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [message, setMessage] = useState("");
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [enrollment, setEnrollment] = useState<any>(null);
+  const [completingLesson, setCompletingLesson] = useState<number | null>(null);
+
+  const loadCourse = async () => {
+    try {
+      const [courseResponse, lessonsResponse, enrollmentsResponse] = await Promise.all([
+        coursesAPI.getCourse(courseId),
+        coursesAPI.getCourseLessons(courseId),
+        coursesAPI.getMyEnrollments(),
+      ]);
+      setCourse(courseResponse.data);
+      setLessons(getCollectionResults(lessonsResponse.data));
+      const enrollments = getCollectionResults(enrollmentsResponse.data);
+      setEnrollment(enrollments.find((item: any) => item.course === courseId) || null);
+    } catch (error) {
+      router.push("/dashboard/courses");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    coursesAPI.getCourse(courseId)
-      .then((response) => setCourse(response.data))
-      .catch(() => router.push("/dashboard/courses"))
-      .finally(() => setLoading(false));
+    loadCourse();
   }, [courseId, router]);
 
   const handleEnroll = async () => {
@@ -30,10 +48,35 @@ export default function CourseDetailPage() {
     try {
       await coursesAPI.enrollInCourse(courseId);
       setMessage("Enrollment successful. Your course is ready to start.");
+      await loadCourse();
     } catch (error: any) {
-      setMessage(error.response?.data?.detail || "Unable to enroll in this course.");
+      const detail = error.response?.data?.non_field_errors?.[0] || error.response?.data?.detail;
+      if (detail?.toLowerCase().includes("already enrolled")) {
+        setMessage("You are already enrolled. Continue with your lessons below.");
+        await loadCourse();
+      } else {
+        setMessage(detail || "Unable to enroll in this course.");
+      }
     } finally {
       setEnrolling(false);
+    }
+  };
+
+  const completeLesson = async (lessonId: number) => {
+    if (!enrollment) return;
+    setCompletingLesson(lessonId);
+    try {
+      await coursesAPI.updateProgress(enrollment.id, {
+        lesson_id: lessonId,
+        is_completed: true,
+        time_spent_seconds: 0,
+      });
+      await loadCourse();
+      setMessage("Lesson completed. Your progress has been saved.");
+    } catch (error: any) {
+      setMessage(error.response?.data?.detail || "Unable to save lesson progress.");
+    } finally {
+      setCompletingLesson(null);
     }
   };
 
@@ -62,9 +105,35 @@ export default function CourseDetailPage() {
             <div className="rounded-xl bg-emerald-50 p-4"><p className="text-sm text-gray-500">Price</p><p className="text-xl font-semibold">{course.is_free ? "Free" : formatCurrency(course.price)}</p></div>
           </div>
           {message && <p className="rounded-lg bg-blue-50 p-3 text-sm text-blue-800">{message}</p>}
-          <Button onClick={handleEnroll} disabled={enrolling} className="w-full sm:w-auto">
-            {enrolling ? "Enrolling..." : course.is_free ? "Enroll now" : "Enroll and continue"}
-          </Button>
+          {!enrollment ? (
+            <Button onClick={handleEnroll} disabled={enrolling} className="w-full sm:w-auto">
+              {enrolling ? "Enrolling..." : course.is_free ? "Enroll now" : "Enroll and continue"}
+            </Button>
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-xl bg-blue-50 p-4">
+                <div className="flex items-center justify-between text-sm font-medium">
+                  <span>Course progress</span><span>{enrollment.progress_percentage}%</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-blue-100">
+                  <div className="h-full bg-blue-600 transition-all" style={{ width: `${enrollment.progress_percentage}%` }} />
+                </div>
+              </div>
+              <div className="space-y-3">
+                {lessons.map((lesson) => {
+                  const completed = enrollment.lessons_completed?.includes(lesson.id);
+                  return (
+                    <div key={lesson.id} className="flex items-center justify-between rounded-xl border p-4">
+                      <div><p className="font-medium">{lesson.title}</p><p className="text-sm text-gray-500">{lesson.lesson_type}</p></div>
+                      <Button variant={completed ? "outline" : "default"} disabled={completed || completingLesson === lesson.id} onClick={() => completeLesson(lesson.id)}>
+                        {completed ? "Completed" : completingLesson === lesson.id ? "Saving..." : "Complete lesson"}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
