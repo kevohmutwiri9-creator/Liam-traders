@@ -6,9 +6,28 @@ from rest_framework.test import APIClient
 
 from apps.courses.models import Course, Enrollment, Lesson, LessonNote
 from apps.users.models import User
+from apps.seed_content import ensure_lesson_content
 
 
 class CourseEnrollmentApiTests(TestCase):
+    def test_lesson_materials_include_reading_and_video_links(self):
+        instructor = User.objects.create_user(
+            email='materials-instructor@example.com', password='StrongPass123!',
+            full_name='Materials Instructor', is_staff=True,
+        )
+        course = Course.objects.create(
+            title='Python Programming Course', description='Python', category='programming',
+            difficulty='beginner', status='published', instructor=instructor,
+            duration_hours=1, number_of_lessons=1, slug='materials-course-test',
+        )
+        Lesson.objects.create(course=course, title='Python basics')
+
+        self.assertEqual(ensure_lesson_content(), 1)
+        lesson = Lesson.objects.get(course=course)
+        self.assertTrue(lesson.content)
+        self.assertTrue(lesson.video_url)
+        self.assertGreaterEqual(len(lesson.resources), 2)
+
     def test_user_can_enroll_in_published_course(self):
         instructor = User.objects.create_user(
             email='instructor@example.com',

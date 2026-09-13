@@ -151,6 +151,13 @@ export default function CourseDetailPage() {
                           {completed ? "Completed" : completingLesson === lesson.id ? "Saving..." : "Complete lesson"}
                         </Button>
                       </div>
+                      <div className="space-y-3 rounded-xl bg-slate-50 p-4">
+                        <p className="whitespace-pre-line text-sm leading-6 text-slate-700">{lesson.content || lesson.description}</p>
+                        {lesson.video_url && <a href={lesson.video_url} target="_blank" rel="noreferrer" className="inline-flex rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700">Watch related video lessons</a>}
+                        {lesson.resources?.length > 0 && <div className="flex flex-wrap gap-2">{lesson.resources.map((resource: any) => (
+                          <a key={resource.url || resource.label} href={resource.url || "#"} target={resource.url ? "_blank" : undefined} rel="noreferrer" className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-blue-700 hover:border-blue-400">{resource.label}</a>
+                        ))}</div>}
+                      </div>
                       <div className="rounded-xl bg-amber-50 p-4">
                       <textarea
                         value={notes[lesson.id] || ""}

@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 
-from apps.courses.models import Course, CourseTemplate
+from apps.courses.models import Course, CourseTemplate, Lesson
 from apps.surveys.models import QuestionBank, Survey, SurveyTemplate
 from apps.tasks.models import Task, TaskTemplate
 
@@ -221,12 +221,49 @@ def ensure_task_templates():
 
 
 def ensure_demo_content():
+    ensure_lesson_content()
     return {
         'question_bank': ensure_question_bank(),
         'courses': ensure_course_templates()[0],
         'surveys': ensure_survey_templates()[0],
         'tasks': ensure_task_templates()[0],
     }
+
+
+def ensure_lesson_content():
+    """Backfill readable material and reputable study links for generated lessons."""
+    updated = 0
+    for lesson in Lesson.objects.filter(content__isnull=True) | Lesson.objects.filter(content=''):
+        course_text = f'{lesson.course.title} {lesson.course.category}'.lower()
+        if 'python' in course_text:
+            docs_url = 'https://docs.python.org/3/tutorial/'
+            video_url = 'https://www.youtube.com/results?search_query=Python+programming+beginner+tutorial'
+            focus = 'Python programming fundamentals'
+        elif 'javascript' in course_text or 'react' in course_text or 'web' in course_text:
+            docs_url = 'https://developer.mozilla.org/en-US/docs/Learn'
+            video_url = 'https://www.youtube.com/results?search_query=JavaScript+web+development+tutorial'
+            focus = 'modern web development'
+        else:
+            docs_url = 'https://developer.mozilla.org/en-US/docs/Learn'
+            video_url = 'https://www.youtube.com/results?search_query=web+development+beginner+tutorial'
+            focus = 'practical digital skills'
+
+        lesson.description = lesson.description or f"A practical lesson covering {lesson.title.lower()}."
+        lesson.content = (
+            f"{lesson.title}\n\n"
+            f"Study the key ideas behind {lesson.title.lower()} using {focus}, then apply them to a small example.\n\n"
+            "Practice task\n"
+            "Write a short summary in your own words and save your notes in this course library."
+        )
+        lesson.video_url = lesson.video_url or video_url
+        lesson.resources = lesson.resources or [
+            {'label': 'Official learning guide', 'type': 'link', 'url': docs_url},
+            {'label': 'Find relevant video lessons', 'type': 'link', 'url': video_url},
+            {'label': 'Lesson checklist', 'type': 'text', 'value': 'Read, practice, take notes, complete the lesson.'},
+        ]
+        lesson.save(update_fields=['description', 'content', 'video_url', 'resources', 'updated_at'])
+        updated += 1
+    return updated
 
 
 def ensure_generated_content():
@@ -254,4 +291,5 @@ def ensure_generated_content():
             if template.generate_task():
                 generated['tasks'] += 1
 
+    generated['lesson_materials'] = ensure_lesson_content()
     return generated
