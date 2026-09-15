@@ -71,14 +71,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 flex items-center justify-center py-12 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-teal-500 via-cyan-600 to-blue-700 flex items-center justify-center py-12 px-4 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-violet-400 rounded-full opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-400 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500 rounded-full opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-20 left-20 w-32 h-32 bg-violet-400 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '3s' }}></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-purple-300 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_50%)] animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.08)_0%,transparent_50%)] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
       <Card className="w-full max-w-md relative z-10">

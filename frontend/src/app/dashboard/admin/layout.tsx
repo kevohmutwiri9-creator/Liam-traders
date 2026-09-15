@@ -80,11 +80,8 @@ export default function AdminLayout({
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-zinc-900 relative overflow-hidden">
       {/* Animated Background Elements - Dark Theme */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500 rounded-full opacity-10 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-orange-500 rounded-full opacity-10 animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500 rounded-full opacity-5 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-20 left-20 w-32 h-32 bg-red-600 rounded-full opacity-8 animate-bounce" style={{ animationDuration: '3s' }}></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-orange-600 rounded-full opacity-8 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_50%,rgba(239,68,68,0.1)_0%,transparent_50%)] animate-pulse"></div>
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_50%,rgba(249,115,22,0.08)_0%,transparent_50%)] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
       </div>
 
       {/* Header */}
