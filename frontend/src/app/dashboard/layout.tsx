@@ -77,9 +77,18 @@ export default function DashboardLayout({
   const activationRequired = Boolean(user && !user.is_staff && !user.is_activated);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-300 rounded-full opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-300 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-sky-400 rounded-full opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-400 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-indigo-300 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
+      </div>
+
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-20">
+      <header className="bg-white/80 backdrop-blur-sm border-b sticky top-0 z-20">
         <div className="container">
           <div className="flex items-center justify-between h-16">
             <Link href={activationRequired ? "/dashboard/activation" : "/dashboard"} className="flex items-center gap-2 min-w-0">

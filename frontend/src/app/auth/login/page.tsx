@@ -17,11 +17,21 @@ export default function LoginPage() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  const fieldClass = (field: string) => fieldErrors[field] ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : "";
+
+  const updateField = (field: string, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => ({ ...current, [field]: "" }));
+    setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
     setLoading(true);
 
     try {
@@ -52,7 +62,10 @@ export default function LoginPage() {
       localStorage.removeItem("activation_required");
       router.push(destination);
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Login failed. Please try again.");
+      const data = err.response?.data || {};
+      const detail = data.detail || data.non_field_errors?.[0] || "Email or password is incorrect.";
+      setError(detail);
+      setFieldErrors({ email: detail, password: detail });
     } finally {
       setLoading(false);
     }
@@ -96,9 +109,11 @@ export default function LoginPage() {
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => updateField("email", e.target.value)}
+                className={fieldClass("email")}
                 required
               />
+              {fieldErrors.email && <p className="text-sm text-red-600">{fieldErrors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -110,9 +125,11 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => updateField("password", e.target.value)}
+                className={fieldClass("password")}
                 required
               />
+              {fieldErrors.password && <p className="text-sm text-red-600">{fieldErrors.password}</p>}
             </div>
 
             <div className="text-right">
