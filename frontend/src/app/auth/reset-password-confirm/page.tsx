@@ -54,10 +54,22 @@ export default function ResetPasswordConfirmPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-400 rounded-full opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-400 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500 rounded-full opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-emerald-400 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-teal-300 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
+      </div>
+
+      <Card className="w-full max-w-md relative z-10">
         <CardHeader>
-          <CardTitle>Reset password</CardTitle>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src="/logo.png" alt="Liam Traders" className="w-12 h-12" />
+            <CardTitle className="text-2xl">Reset Password</CardTitle>
+          </div>
           <CardDescription>Choose a new password with at least 6 characters.</CardDescription>
         </CardHeader>
         <CardContent>

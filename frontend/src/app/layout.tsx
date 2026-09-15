@@ -7,6 +7,24 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  openGraph: {
+    title: "Liam Traders - Earn & Learn Platform",
+    description: "A comprehensive platform for earning through legitimate work and learning skills",
+    images: [
+      {
+        url: "/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Liam Traders Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Liam Traders - Earn & Learn Platform",
+    description: "A comprehensive platform for earning through legitimate work and learning skills",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({

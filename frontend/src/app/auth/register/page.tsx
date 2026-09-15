@@ -17,18 +17,30 @@ export default function RegisterPage() {
     re_password: "",
   });
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  const fieldClass = (field: string) => fieldErrors[field] ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : "";
+
+  const updateField = (field: string, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => ({ ...current, [field]: "" }));
+    setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
 
     if (formData.password !== formData.re_password) {
       setError("Passwords do not match");
+      setFieldErrors({ password: "Passwords do not match", re_password: "Passwords do not match" });
       return;
     }
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
+      setFieldErrors({ password: "Use at least 6 characters" });
       return;
     }
 
@@ -46,17 +58,35 @@ export default function RegisterPage() {
       localStorage.setItem("activation_required", "true");
       router.push("/auth/login?registered=true&next=%2Fdashboard%2Factivation");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Registration failed. Please try again.");
+      const data = err.response?.data || {};
+      const nextErrors: Record<string, string> = {};
+      Object.entries(data).forEach(([field, value]) => {
+        if (field !== "detail") nextErrors[field] = Array.isArray(value) ? String(value[0]) : String(value);
+      });
+      setFieldErrors(nextErrors);
+      setError(data.detail || Object.values(nextErrors)[0] || "Registration failed. Please correct the highlighted fields.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700 flex items-center justify-center py-12 px-4 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-violet-400 rounded-full opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-400 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500 rounded-full opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-violet-400 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-purple-300 rounded-full opacity-15 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
+      </div>
+
+      <Card className="w-full max-w-md relative z-10">
         <CardHeader>
-          <CardTitle className="text-2xl">Create Account</CardTitle>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src="/logo.png" alt="Liam Traders" className="w-12 h-12" />
+            <CardTitle className="text-2xl">Create Account</CardTitle>
+          </div>
           <CardDescription>
             Join Liam Traders and start earning today
           </CardDescription>
@@ -78,9 +108,11 @@ export default function RegisterPage() {
                 type="text"
                 placeholder="John Doe"
                 value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                onChange={(e) => updateField("full_name", e.target.value)}
+                className={fieldClass("full_name")}
                 required
               />
+              {fieldErrors.full_name && <p className="text-sm text-red-600">{fieldErrors.full_name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -92,9 +124,11 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => updateField("email", e.target.value)}
+                className={fieldClass("email")}
                 required
               />
+              {fieldErrors.email && <p className="text-sm text-red-600">{fieldErrors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -106,11 +140,13 @@ export default function RegisterPage() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => updateField("password", e.target.value)}
                 minLength={6}
+                className={fieldClass("password")}
                 required
               />
               <p className="text-xs text-gray-500">Use at least 6 characters.</p>
+              {fieldErrors.password && <p className="text-sm text-red-600">{fieldErrors.password}</p>}
             </div>
 
             <div className="space-y-2">
@@ -122,9 +158,11 @@ export default function RegisterPage() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.re_password}
-                onChange={(e) => setFormData({ ...formData, re_password: e.target.value })}
+                onChange={(e) => updateField("re_password", e.target.value)}
+                className={fieldClass("re_password")}
                 required
               />
+              {fieldErrors.re_password && <p className="text-sm text-red-600">{fieldErrors.re_password}</p>}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
