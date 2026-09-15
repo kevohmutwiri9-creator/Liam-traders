@@ -19,7 +19,16 @@ function HomeContent() {
     referral_code: "",
   });
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+
+  const fieldClass = (field: string) => fieldErrors[field] ? "border-red-500 bg-red-50 focus-visible:ring-red-500" : "";
+
+  const updateField = (field: string, value: string) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => ({ ...current, [field]: "" }));
+    setError("");
+  };
 
   useEffect(() => {
     // Get referral code from URL parameter
@@ -32,9 +41,16 @@ function HomeContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
 
     if (formData.password !== formData.re_password) {
       setError("Passwords do not match");
+      setFieldErrors({ password: "Passwords do not match", re_password: "Passwords do not match" });
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      setFieldErrors({ password: "Use at least 6 characters" });
       return;
     }
 
@@ -58,7 +74,13 @@ function HomeContent() {
       // Redirect to login page
       router.push("/auth/login?registered=true");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Registration failed. Please try again.");
+      const data = err.response?.data || {};
+      const nextErrors: Record<string, string> = {};
+      Object.entries(data).forEach(([field, value]) => {
+        if (field !== "detail") nextErrors[field] = Array.isArray(value) ? String(value[0]) : String(value);
+      });
+      setFieldErrors(nextErrors);
+      setError(data.detail || Object.values(nextErrors)[0] || "Registration failed. Please correct the highlighted fields.");
     } finally {
       setLoading(false);
     }
@@ -102,9 +124,11 @@ function HomeContent() {
                 type="text"
                 placeholder="John Doe"
                 value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                onChange={(e) => updateField("full_name", e.target.value)}
+                className={fieldClass("full_name")}
                 required
               />
+              {fieldErrors.full_name && <p className="text-sm text-red-600">{fieldErrors.full_name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -116,9 +140,11 @@ function HomeContent() {
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => updateField("email", e.target.value)}
+                className={fieldClass("email")}
                 required
               />
+              {fieldErrors.email && <p className="text-sm text-red-600">{fieldErrors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -130,9 +156,13 @@ function HomeContent() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => updateField("password", e.target.value)}
+                minLength={6}
+                className={fieldClass("password")}
                 required
               />
+              <p className="text-xs text-gray-500">Use at least 6 characters.</p>
+              {fieldErrors.password && <p className="text-sm text-red-600">{fieldErrors.password}</p>}
             </div>
 
             <div className="space-y-2">
@@ -144,9 +174,11 @@ function HomeContent() {
                 type="password"
                 placeholder="••••••••"
                 value={formData.re_password}
-                onChange={(e) => setFormData({ ...formData, re_password: e.target.value })}
+                onChange={(e) => updateField("re_password", e.target.value)}
+                className={fieldClass("re_password")}
                 required
               />
+              {fieldErrors.re_password && <p className="text-sm text-red-600">{fieldErrors.re_password}</p>}
             </div>
 
             <div className="space-y-2">
