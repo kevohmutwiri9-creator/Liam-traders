@@ -27,6 +27,10 @@ export default function RegisterPage() {
       setError("Passwords do not match");
       return;
     }
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
 
     setLoading(true);
 
@@ -103,8 +107,10 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                minLength={6}
                 required
               />
+              <p className="text-xs text-gray-500">Use at least 6 characters.</p>
             </div>
 
             <div className="space-y-2">

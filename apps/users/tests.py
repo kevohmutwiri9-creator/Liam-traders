@@ -2,8 +2,9 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.test import TestCase
+from django.test import override_settings
 from django.urls import reverse
-from rest_framework.test import APIRequestFactory, force_authenticate
+from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
 
 from apps.courses.models import CourseTemplate
 from apps.seed_content import ensure_demo_content
@@ -15,6 +16,34 @@ from apps.users.views import PaymentApprovalView, UserProfileView
 
 
 class UserCreateSerializerTests(TestCase):
+    def test_registration_rejects_password_shorter_than_six_characters(self):
+        serializer = UserCreateSerializer(
+            data={
+                'email': 'short-password@example.com',
+                'full_name': 'Short Password',
+                'password': '12345',
+                're_password': '12345',
+            }
+        )
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('password', serializer.errors)
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_forgot_password_endpoint_accepts_existing_email(self):
+        User.objects.create_user(
+            email='reset@example.com',
+            password='StrongPass123!',
+            full_name='Reset User',
+        )
+        response = APIClient().post(
+            '/api/auth/users/reset_password/',
+            {'email': 'reset@example.com'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, 204, response.data)
+
     def test_valid_referral_code_is_accepted_and_saved(self):
         referrer = User.objects.create_user(
             email='kevohmutwiri35@gmail.com',

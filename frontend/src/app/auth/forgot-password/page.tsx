@@ -21,10 +21,11 @@ export default function ForgotPasswordPage() {
 
     try {
       await authAPI.forgotPassword({ email });
-      setMessage("Password reset link has been sent to your email if it exists in our system.");
+      setMessage("If that email exists, a password reset link has been sent. Check your inbox and spam folder.");
       setEmail("");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to send reset link. Please try again.");
+      const responseError = err.response?.data;
+      setError(responseError?.detail || responseError?.email?.[0] || "Failed to send reset link. Please try again.");
     } finally {
       setLoading(false);
     }
