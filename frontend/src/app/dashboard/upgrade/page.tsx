@@ -8,8 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { getCollectionResults, userAPI, paymentsAPI } from "@/lib/api";
 
-const ACTIVATION_FEE = 200;
-
 const LEVEL_PRICES = {
   1: 0,
   2: 500,
@@ -51,11 +49,6 @@ export default function LevelUpgradePage() {
       setUser(profileRes.data);
       setMyPayments(getCollectionResults(paymentsRes.data));
 
-      if (!profileRes.data.is_activated) {
-        router.replace("/dashboard/activation");
-        return;
-      }
-      
       // Set default to next level
       const nextLevel = profileRes.data.level + 1;
       if (nextLevel <= 5) {
@@ -75,11 +68,9 @@ export default function LevelUpgradePage() {
 
     try {
       await paymentsAPI.submitLevelPayment({
-        payment_type: user?.is_activated ? "upgrade" : "activation",
-        target_level: user?.is_activated ? selectedLevel : 1,
-        amount: user?.is_activated
-          ? LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES]
-          : ACTIVATION_FEE,
+        payment_type: "upgrade",
+        target_level: selectedLevel,
+        amount: LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES],
         transaction_reference: transactionRef,
       });
       
@@ -127,14 +118,14 @@ export default function LevelUpgradePage() {
           <CardHeader>
             <CardTitle>Payment Instructions</CardTitle>
               <CardDescription>
-                {user?.is_activated ? "Pay via Equity PayBill to upgrade your level" : "Activate your account before accessing paid opportunities"}
+                Pay via Equity PayBill to upgrade your level
               </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
               <div className="flex justify-between items-center">
-                <span className="font-semibold">{user?.is_activated ? "Selected Level Fee:" : "Activation Fee:"}</span>
-                <span className="font-mono text-lg">KSh {user?.is_activated ? LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES] : ACTIVATION_FEE}</span>
+                <span className="font-semibold">Selected Level Fee:</span>
+                <span className="font-mono text-lg">KSh {LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES]}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-semibold">PayBill Number:</span>
@@ -153,7 +144,7 @@ export default function LevelUpgradePage() {
               </div>
             </div>
 
-            {user?.is_activated && <div className="space-y-2">
+            <div className="space-y-2">
               <h3 className="font-semibold">Level Pricing:</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {[2, 3, 4, 5].map((level) => (
@@ -172,7 +163,7 @@ export default function LevelUpgradePage() {
                   </div>
                 ))}
               </div>
-            </div>}
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -218,9 +209,7 @@ export default function LevelUpgradePage() {
                 className="w-full"
                 disabled={submitting || !transactionRef}
               >
-                {submitting ? "Submitting..." : user?.is_activated
-                  ? `Submit Level ${selectedLevel} Payment (KSh ${LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES]})`
-                  : `Submit Activation Payment (KSh ${ACTIVATION_FEE})`}
+                {submitting ? "Submitting..." : `Submit Level ${selectedLevel} Payment (KSh ${LEVEL_PRICES[selectedLevel as keyof typeof LEVEL_PRICES]})`}
               </Button>
             </form>
           </CardContent>
@@ -236,7 +225,7 @@ export default function LevelUpgradePage() {
               <p className="text-gray-500 text-center py-4">No payment history</p>
             ) : (
               <div className="space-y-3">
-                {myPayments.map((payment) => (
+                {myPayments.filter((payment) => payment.payment_type !== "activation").map((payment) => (
                   <div
                     key={payment.id}
                     className="border rounded-lg p-4 flex justify-between items-start"

@@ -54,9 +54,8 @@ export default function RegisterPage() {
         re_password: formData.re_password,
       });
       
-      // Sign in first, then continue directly to activation.
-      localStorage.setItem("activation_required", "true");
-      router.push("/auth/login?registered=true&next=%2Fdashboard%2Factivation");
+      // Sign in first, then continue directly to dashboard.
+      router.push("/auth/login?registered=true&next=%2Fdashboard");
     } catch (err: any) {
       const data = err.response?.data || {};
       const nextErrors: Record<string, string> = {};

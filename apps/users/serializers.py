@@ -56,6 +56,10 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             user.referred_by = referrer
             user.save(update_fields=['referred_by'])
 
+        # Auto-activate user on registration
+        user.is_activated = True
+        user.save(update_fields=['is_activated'])
+
         # Generate referral code for new user
         user.generate_referral_code()
 
